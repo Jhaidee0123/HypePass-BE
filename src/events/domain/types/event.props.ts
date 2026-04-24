@@ -1,0 +1,26 @@
+import { BaseProps } from '../../../shared/domain/types/base.props';
+import { EventStatus } from './event-status';
+
+export type EventProps = BaseProps & {
+    companyId: string;
+    categoryId?: string | null;
+    venueId?: string | null;
+    title: string;
+    slug: string;
+    shortDescription?: string | null;
+    description?: string | null;
+    coverImageUrl?: string | null;
+    bannerImageUrl?: string | null;
+    status: EventStatus;
+    publicationSubmittedAt?: Date | null;
+    publicationApprovedAt?: Date | null;
+    publicationRejectedAt?: Date | null;
+    publicationReviewedBy?: string | null;
+    resaleEnabled: boolean;
+    transferEnabled: boolean;
+    defaultQrVisibleHoursBefore?: number | null;
+    currency: string;
+    resalePriceCapMultiplier?: number | null;
+    resaleFeePct?: number | null;
+    maxTicketsPerUserPerSession?: number | null;
+};
