@@ -46,6 +46,10 @@ export async function decorateTicket(
             slug: event.slug,
             title: event.title,
             coverImageUrl: event.coverImageUrl ?? null,
+            locationName: event.locationName ?? null,
+            locationAddress: event.locationAddress ?? null,
+            locationLatitude: event.locationLatitude ?? null,
+            locationLongitude: event.locationLongitude ?? null,
         },
         session: {
             id: session.id,

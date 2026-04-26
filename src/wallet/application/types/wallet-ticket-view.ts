@@ -14,6 +14,10 @@ export type WalletTicketEventInfo = {
     slug: string;
     title: string;
     coverImageUrl: string | null;
+    locationName: string | null;
+    locationAddress: string | null;
+    locationLatitude: number | null;
+    locationLongitude: number | null;
 };
 
 export type WalletTicketVenueInfo = {

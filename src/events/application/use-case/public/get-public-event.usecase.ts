@@ -61,11 +61,16 @@ export class GetPublicEventUseCase {
             }),
         );
 
+        const isPast =
+            sessions.length > 0 &&
+            sessions.every((s) => s.endsAt.getTime() <= now.getTime());
+
         return {
             event,
             category,
             venue,
             sessions: decoratedSessions as PublicEventDetail['sessions'],
+            isPast,
         };
     }
 }

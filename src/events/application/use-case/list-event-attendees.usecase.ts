@@ -21,6 +21,12 @@ export type AttendeeRow = {
     ownerName: string | null;
     transferred: boolean;
     promoterReferralCode: string | null;
+    /** Resolved name/email of the promoter that owns the referral code at
+     *  the time of read. Helps the organizer see *which promoter* this
+     *  ticket is attributed to without having to cross-reference codes by
+     *  hand. Null when the ticket has no promoter attribution. */
+    promoterName: string | null;
+    promoterEmail: string | null;
     faceValue: number;
     currency: string;
 };
@@ -152,30 +158,82 @@ export class ListEventAttendeesUseCase {
             params,
         );
 
-        const items: AttendeeRow[] = rows.map((r) => ({
-            ticketId: r.ticket_id,
-            issuedAt: r.issued_at.toISOString(),
-            sessionId: r.session_id,
-            sessionName: r.session_name,
-            sessionStartsAt: r.session_starts_at.toISOString(),
-            sectionId: r.section_id,
-            sectionName: r.section_name,
-            type: r.courtesy ? 'courtesy' : 'paid',
-            status: r.status,
-            paymentReference: r.payment_reference,
-            buyerFullName: r.buyer_full_name,
-            buyerEmail: r.buyer_email,
-            ownerEmail: r.owner_email,
-            ownerName: r.owner_name,
-            transferred: !!(
-                r.buyer_user_id &&
-                r.current_owner_user_id &&
-                r.buyer_user_id !== r.current_owner_user_id
+        // Resolve promoter name/email per distinct referral code that shows
+        // up in this page. We pick the active promoter row first; if the
+        // promoter has been revoked, fall back to the most recently created
+        // row (codes can be reused after revoke, so this is the best we can
+        // do without storing promoter_user_id on the order itself).
+        const codes = Array.from(
+            new Set(
+                rows
+                    .map((r) => r.promoter_referral_code)
+                    .filter((c): c is string => !!c),
             ),
-            promoterReferralCode: r.promoter_referral_code,
-            faceValue: r.face_value,
-            currency: r.currency,
-        }));
+        );
+        const promoterByCode = new Map<
+            string,
+            { name: string | null; email: string | null }
+        >();
+        if (codes.length > 0) {
+            const promoterRows = await this.ds.query<
+                Array<{
+                    referral_code: string;
+                    name: string | null;
+                    email: string | null;
+                }>
+            >(
+                `SELECT DISTINCT ON (ep.referral_code)
+                    ep.referral_code,
+                    u.name,
+                    u.email
+                 FROM event_promoters ep
+                 LEFT JOIN "user" u ON u.id = ep.user_id
+                 WHERE ep.event_id = $1
+                   AND ep.referral_code = ANY($2)
+                 ORDER BY ep.referral_code,
+                          (ep.revoked_at IS NULL) DESC,
+                          ep.created_at DESC`,
+                [event.id, codes],
+            );
+            for (const p of promoterRows) {
+                promoterByCode.set(p.referral_code, {
+                    name: p.name,
+                    email: p.email,
+                });
+            }
+        }
+
+        const items: AttendeeRow[] = rows.map((r) => {
+            const promoter = r.promoter_referral_code
+                ? promoterByCode.get(r.promoter_referral_code) ?? null
+                : null;
+            return {
+                ticketId: r.ticket_id,
+                issuedAt: r.issued_at.toISOString(),
+                sessionId: r.session_id,
+                sessionName: r.session_name,
+                sessionStartsAt: r.session_starts_at.toISOString(),
+                sectionId: r.section_id,
+                sectionName: r.section_name,
+                type: r.courtesy ? 'courtesy' : 'paid',
+                status: r.status,
+                paymentReference: r.payment_reference,
+                buyerFullName: r.buyer_full_name,
+                buyerEmail: r.buyer_email,
+                ownerEmail: r.owner_email,
+                ownerName: r.owner_name,
+                transferred: !!(
+                    r.buyer_user_id &&
+                    r.current_owner_user_id &&
+                    r.buyer_user_id !== r.current_owner_user_id
+                ),
+                promoterReferralCode: r.promoter_referral_code,
+                promoterName: promoter?.name ?? null,
+                promoterEmail: promoter?.email ?? null,
+                faceValue: r.face_value,
+                currency: r.currency,
+            };
+        });
 
         return { items, total, limit, offset };
     }

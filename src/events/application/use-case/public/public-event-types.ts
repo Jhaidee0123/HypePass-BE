@@ -51,4 +51,8 @@ export type PublicEventDetail = {
             >;
         }
     >;
+    /** True when every session of the event has already ended. The page is
+     *  still served (so old links keep working) but the FE renders a
+     *  "Past event" state instead of the purchase flow. */
+    isPast: boolean;
 };
