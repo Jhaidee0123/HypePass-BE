@@ -1,9 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, ILike, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { AuditLogEntity } from '../../domain/entities/audit-log.entity';
 import {
     AuditLogFilter,
+    AuditLogPage,
     IAuditLogRepository,
 } from '../../domain/repositories/audit-log.repository';
 import {
@@ -42,17 +43,44 @@ export class AuditLogService implements IAuditLogRepository {
     }
 
     async findMany(filter: AuditLogFilter): Promise<AuditLogEntity[]> {
+        const rows = await this.repo.find({
+            where: this.buildWhere(filter),
+            order: { createdAt: 'DESC' },
+            take: filter.limit ?? 100,
+            skip: filter.offset ?? 0,
+        });
+        return rows.map(AuditLogMapper.toDomain);
+    }
+
+    async findPaged(filter: AuditLogFilter): Promise<AuditLogPage> {
+        const [rows, total] = await this.repo.findAndCount({
+            where: this.buildWhere(filter),
+            order: { createdAt: 'DESC' },
+            take: filter.limit ?? 50,
+            skip: filter.offset ?? 0,
+        });
+        return { items: rows.map(AuditLogMapper.toDomain), total };
+    }
+
+    private buildWhere(filter: AuditLogFilter): Record<string, unknown> {
         const where: Record<string, unknown> = {};
         if (filter.targetType) where.targetType = filter.targetType;
         if (filter.targetId) where.targetId = filter.targetId;
         if (filter.actorUserId) where.actorUserId = filter.actorUserId;
-        if (filter.action) where.action = filter.action;
-        const rows = await this.repo.find({
-            where,
-            order: { createdAt: 'DESC' },
-            take: filter.limit ?? 100,
-        });
-        return rows.map(AuditLogMapper.toDomain);
+        if (filter.actorKind) where.actorKind = filter.actorKind;
+        if (filter.action) {
+            where.action = filter.action;
+        } else if (filter.actionPrefix) {
+            where.action = ILike(`${filter.actionPrefix}%`);
+        }
+        if (filter.dateFrom && filter.dateTo) {
+            where.createdAt = Between(filter.dateFrom, filter.dateTo);
+        } else if (filter.dateFrom) {
+            where.createdAt = MoreThanOrEqual(filter.dateFrom);
+        } else if (filter.dateTo) {
+            where.createdAt = LessThanOrEqual(filter.dateTo);
+        }
+        return where;
     }
 
     /** Fire-and-forget helper. Never throws. */

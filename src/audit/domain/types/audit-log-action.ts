@@ -5,6 +5,8 @@
 export type AuditLogAction =
     | 'company.approved'
     | 'company.rejected'
+    | 'company.suspended'
+    | 'company.reinstated'
     | 'event.approved'
     | 'event.rejected'
     | 'event.published'
@@ -16,6 +18,14 @@ export type AuditLogAction =
     | 'order.marked_reconciled'
     | 'courtesy.issued'
     | 'staff.assigned'
-    | 'staff.revoked';
+    | 'staff.revoked'
+    | 'user.role_changed'
+    | 'user.banned'
+    | 'user.unbanned'
+    | 'user.deleted'
+    | 'user.password_reset_sent'
+    | 'platform_setting.updated'
+    | 'promoter.assigned'
+    | 'promoter.revoked';
 
 export type AuditActorKind = 'user' | 'system';

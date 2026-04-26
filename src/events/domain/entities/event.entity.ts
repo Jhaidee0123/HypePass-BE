@@ -24,6 +24,10 @@ export class EventEntity extends BaseEntity {
     readonly resalePriceCapMultiplier?: number | null;
     readonly resaleFeePct?: number | null;
     readonly maxTicketsPerUserPerSession?: number | null;
+    readonly locationName?: string | null;
+    readonly locationAddress?: string | null;
+    readonly locationLatitude?: number | null;
+    readonly locationLongitude?: number | null;
 
     constructor(props: EventProps) {
         super(props);
@@ -49,5 +53,9 @@ export class EventEntity extends BaseEntity {
         this.resaleFeePct = props.resaleFeePct ?? null;
         this.maxTicketsPerUserPerSession =
             props.maxTicketsPerUserPerSession ?? null;
+        this.locationName = props.locationName ?? null;
+        this.locationAddress = props.locationAddress ?? null;
+        this.locationLatitude = props.locationLatitude ?? null;
+        this.locationLongitude = props.locationLongitude ?? null;
     }
 }

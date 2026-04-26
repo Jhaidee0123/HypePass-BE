@@ -163,6 +163,17 @@ export class ListPublicEventsUseCase {
                           country: venue.country,
                       }
                     : null,
+                location:
+                    event.locationName ||
+                    event.locationAddress ||
+                    event.locationLatitude !== null
+                        ? {
+                              name: event.locationName ?? null,
+                              address: event.locationAddress ?? null,
+                              latitude: event.locationLatitude ?? null,
+                              longitude: event.locationLongitude ?? null,
+                          }
+                        : null,
                 nextSessionStartsAt: nextSession.startsAt.toISOString(),
                 fromPrice: cheapest,
                 currency: event.currency,

@@ -23,4 +23,8 @@ export type EventProps = BaseProps & {
     resalePriceCapMultiplier?: number | null;
     resaleFeePct?: number | null;
     maxTicketsPerUserPerSession?: number | null;
+    locationName?: string | null;
+    locationAddress?: string | null;
+    locationLatitude?: number | null;
+    locationLongitude?: number | null;
 };

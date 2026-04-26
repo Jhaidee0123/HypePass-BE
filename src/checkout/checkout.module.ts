@@ -13,11 +13,13 @@ import { BETTER_AUTH } from '../auth/constants';
 import { EmailService } from '../shared/infrastructure/services/email.service';
 import { user_service_token } from '../users/infrastructure/tokens/users.tokens';
 import {
+    event_promoter_service_token,
     event_service_token,
     event_session_service_token,
     ticket_sale_phase_service_token,
     ticket_section_service_token,
 } from '../events/infrastructure/tokens/events.tokens';
+import { EventPromoterService } from '../events/application/services/event-promoter.service';
 import {
     payment_gateway_token,
     payment_service_token,
@@ -67,6 +69,7 @@ import { HandleWebhookUseCase } from './application/use-case/handle-webhook.usec
                 payment,
                 gateway,
                 config: ConfigService,
+                promoter: EventPromoterService,
             ) =>
                 new InitiateCheckoutUseCase(
                     ds,
@@ -91,6 +94,7 @@ import { HandleWebhookUseCase } from './application/use-case/handle-webhook.usec
                             config.get<number>('INVENTORY_HOLD_MINUTES', 10),
                         ),
                     },
+                    promoter,
                 ),
             inject: [
                 DataSource,
@@ -105,6 +109,7 @@ import { HandleWebhookUseCase } from './application/use-case/handle-webhook.usec
                 payment_service_token,
                 payment_gateway_token,
                 ConfigService,
+                event_promoter_service_token,
             ],
         },
         {

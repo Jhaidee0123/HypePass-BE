@@ -115,4 +115,36 @@ export class CreateEventDto {
     @IsInt()
     @Min(1)
     maxTicketsPerUserPerSession?: number | null;
+
+    @ApiPropertyOptional({
+        description: 'Free-form venue/location name shown on the event page.',
+        maxLength: 200,
+    })
+    @IsOptional()
+    @IsString()
+    @MaxLength(200)
+    locationName?: string | null;
+
+    @ApiPropertyOptional({
+        description: 'Full street address (kept exactly as the organizer typed/searched it).',
+        maxLength: 400,
+    })
+    @IsOptional()
+    @IsString()
+    @MaxLength(400)
+    locationAddress?: string | null;
+
+    @ApiPropertyOptional({ description: 'WGS84 latitude (-90 to 90).' })
+    @IsOptional()
+    @IsNumber()
+    @Min(-90)
+    @Max(90)
+    locationLatitude?: number | null;
+
+    @ApiPropertyOptional({ description: 'WGS84 longitude (-180 to 180).' })
+    @IsOptional()
+    @IsNumber()
+    @Min(-180)
+    @Max(180)
+    locationLongitude?: number | null;
 }

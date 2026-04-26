@@ -9,6 +9,7 @@ import {
     Param,
     Patch,
     Post,
+    Query,
     UseGuards,
 } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
@@ -43,6 +44,10 @@ import {
     assign_event_staff_usecase_token,
     list_event_staff_usecase_token,
     revoke_event_staff_usecase_token,
+    assign_event_promoters_usecase_token,
+    list_event_promoters_usecase_token,
+    revoke_event_promoter_usecase_token,
+    list_event_attendees_usecase_token,
     list_events_by_company_usecase_token,
     remove_event_media_usecase_token,
     submit_event_for_review_usecase_token,
@@ -75,6 +80,11 @@ import { AssignEventStaffUseCase } from '../../application/use-case/assign-event
 import { ListEventStaffUseCase } from '../../application/use-case/list-event-staff.usecase';
 import { RevokeEventStaffUseCase } from '../../application/use-case/revoke-event-staff.usecase';
 import { AssignEventStaffDto } from '../../application/dto/assign-event-staff.dto';
+import { AssignEventPromotersUseCase } from '../../application/use-case/assign-event-promoters.usecase';
+import { ListEventPromotersUseCase } from '../../application/use-case/list-event-promoters.usecase';
+import { RevokeEventPromoterUseCase } from '../../application/use-case/revoke-event-promoter.usecase';
+import { AssignEventPromotersDto } from '../../application/dto/assign-event-promoters.dto';
+import { ListEventAttendeesUseCase } from '../../application/use-case/list-event-attendees.usecase';
 
 @ApiTags('Organizer — Events')
 @ApiCookieAuth()
@@ -127,6 +137,14 @@ export class OrganizerEventsController {
         private readonly listStaff: ListEventStaffUseCase,
         @Inject(revoke_event_staff_usecase_token)
         private readonly revokeStaff: RevokeEventStaffUseCase,
+        @Inject(assign_event_promoters_usecase_token)
+        private readonly assignPromoters: AssignEventPromotersUseCase,
+        @Inject(list_event_promoters_usecase_token)
+        private readonly listPromoters: ListEventPromotersUseCase,
+        @Inject(revoke_event_promoter_usecase_token)
+        private readonly revokePromoter: RevokeEventPromoterUseCase,
+        @Inject(list_event_attendees_usecase_token)
+        private readonly listAttendees: ListEventAttendeesUseCase,
     ) {}
 
     // ===== events =====
@@ -234,6 +252,71 @@ export class OrganizerEventsController {
             userId,
             session.user.id,
         );
+    }
+
+    // ===== promoters =====
+
+    @Get(':eventId/promoters')
+    getPromoters(
+        @Param('companyId') companyId: string,
+        @Param('eventId') eventId: string,
+    ) {
+        return this.listPromoters.execute(companyId, eventId);
+    }
+
+    @Post(':eventId/promoters')
+    @HttpCode(HttpStatus.CREATED)
+    assignPromotersBatch(
+        @Param('companyId') companyId: string,
+        @Param('eventId') eventId: string,
+        @Body() dto: AssignEventPromotersDto,
+        @Session() session: UserSession,
+    ) {
+        return this.assignPromoters.execute(
+            companyId,
+            eventId,
+            session.user.id,
+            dto,
+        );
+    }
+
+    @Delete(':eventId/promoters/:userId')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    async revokePromoterAssignment(
+        @Param('companyId') companyId: string,
+        @Param('eventId') eventId: string,
+        @Param('userId') userId: string,
+        @Session() session: UserSession,
+    ) {
+        await this.revokePromoter.execute(
+            companyId,
+            eventId,
+            userId,
+            session.user.id,
+        );
+    }
+
+    // ===== attendees (paid + courtesy ticket holders) =====
+
+    @Get(':eventId/attendees')
+    getAttendees(
+        @Param('companyId') companyId: string,
+        @Param('eventId') eventId: string,
+        @Query('sessionId') sessionId?: string,
+        @Query('sectionId') sectionId?: string,
+        @Query('type') type?: 'paid' | 'courtesy',
+        @Query('q') q?: string,
+        @Query('limit') limit?: string,
+        @Query('offset') offset?: string,
+    ) {
+        return this.listAttendees.execute(companyId, eventId, {
+            sessionId,
+            sectionId,
+            type,
+            q,
+            limit: limit ? Number(limit) : undefined,
+            offset: offset ? Number(offset) : undefined,
+        });
     }
 
     @Post(':eventId/submit-review')

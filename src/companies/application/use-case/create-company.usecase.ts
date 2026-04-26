@@ -3,6 +3,7 @@ import {
     UnprocessableDomainException,
 } from '../../../shared/infrastructure/filters/domain.exception';
 import { COMPANY_ROLES } from '../../../auth/constants';
+import { AdminNotificationService } from '../../../admin-notifications/application/services/admin-notification.service';
 import { CompanyEntity } from '../../domain/entities/company.entity';
 import { CompanyMembershipEntity } from '../../domain/entities/company-membership.entity';
 import { ICompanyRepository } from '../../domain/repositories/company.repository';
@@ -14,6 +15,7 @@ export class CreateCompanyUseCase {
     constructor(
         private readonly companyRepo: ICompanyRepository,
         private readonly membershipRepo: ICompanyMembershipRepository,
+        private readonly adminNotifications: AdminNotificationService,
     ) {}
 
     async execute(
@@ -51,6 +53,14 @@ export class CreateCompanyUseCase {
             role: COMPANY_ROLES.OWNER,
         });
         await this.membershipRepo.create(membership);
+
+        void this.adminNotifications.record({
+            kind: 'company.submitted',
+            level: 'info',
+            title: `Nueva compañía pendiente: ${saved.name}`,
+            body: `@${saved.slug} envió KYC. Está esperando revisión.`,
+            metadata: { companyId: saved.id, slug: saved.slug },
+        });
 
         return saved;
     }

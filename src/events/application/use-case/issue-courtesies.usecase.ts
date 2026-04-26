@@ -1,6 +1,6 @@
 import { DataSource, In } from 'typeorm';
 import { Logger } from '@nestjs/common';
-import { randomBytes } from 'crypto';
+import { randomBytes, randomUUID } from 'crypto';
 import {
     ConflictDomainException,
     UnprocessableDomainException,
@@ -159,6 +159,7 @@ export class IssueCourtesiesUseCase {
             // same order so revenue stays 0 and audit is grouped.
             const paymentReference = `CRT-${randomBytes(8).toString('hex')}`;
             const order = qr.manager.create(OrderOrmEntity, {
+                id: randomUUID(),
                 userId: actorUserId,
                 companyId,
                 type: OrderType.COURTESY,
@@ -179,6 +180,7 @@ export class IssueCourtesiesUseCase {
             const issued: IssueCourtesiesResult['issued'] = [];
             for (const recipient of resolved) {
                 const item = qr.manager.create(OrderItemOrmEntity, {
+                    id: randomUUID(),
                     orderId: savedOrder.id,
                     eventId: event.id,
                     eventSessionId: session.id,
@@ -196,6 +198,7 @@ export class IssueCourtesiesUseCase {
                     item,
                 );
                 const ticket = qr.manager.create(TicketOrmEntity, {
+                    id: randomUUID(),
                     orderItemId: savedItem.id,
                     originalOrderId: savedOrder.id,
                     currentOwnerUserId: recipient.userId,
@@ -299,14 +302,14 @@ export class IssueCourtesiesUseCase {
 
     private async sendSetPasswordLink(email: string): Promise<void> {
         try {
-            const redirectTo = `${process.env.APP_URL ?? ''}/login`;
-            await this.auth.api.forgetPassword({
+            const redirectTo = `${process.env.APP_URL ?? ''}/reset-password`;
+            await this.auth.api.requestPasswordReset({
                 body: { email, redirectTo },
                 asResponse: false,
             });
         } catch (err: any) {
             this.logger.warn(
-                `forgetPassword for courtesy ${email} failed: ${err?.message ?? 'unknown'}`,
+                `requestPasswordReset for courtesy ${email} failed: ${err?.message ?? 'unknown'}`,
             );
         }
     }

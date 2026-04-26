@@ -23,6 +23,7 @@ export class OrderEntity extends BaseEntity {
     readonly buyerLegalIdType?: string | null;
     readonly needsReconciliation: boolean;
     readonly reconciliationReason?: string | null;
+    readonly promoterReferralCode?: string | null;
 
     constructor(props: OrderProps) {
         super(props);
@@ -46,5 +47,6 @@ export class OrderEntity extends BaseEntity {
         this.buyerLegalIdType = props.buyerLegalIdType;
         this.needsReconciliation = props.needsReconciliation ?? false;
         this.reconciliationReason = props.reconciliationReason ?? null;
+        this.promoterReferralCode = props.promoterReferralCode ?? null;
     }
 }

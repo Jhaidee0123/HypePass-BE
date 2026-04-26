@@ -26,6 +26,10 @@ export class EventMapper {
             resalePriceCapMultiplier: orm.resalePriceCapMultiplier,
             resaleFeePct: orm.resaleFeePct,
             maxTicketsPerUserPerSession: orm.maxTicketsPerUserPerSession,
+            locationName: orm.locationName,
+            locationAddress: orm.locationAddress,
+            locationLatitude: orm.locationLatitude,
+            locationLongitude: orm.locationLongitude,
             createdAt: orm.createdAt,
             updatedAt: orm.updatedAt,
         });
@@ -57,6 +61,10 @@ export class EventMapper {
             resaleFeePct: entity.resaleFeePct ?? null,
             maxTicketsPerUserPerSession:
                 entity.maxTicketsPerUserPerSession ?? null,
+            locationName: entity.locationName ?? null,
+            locationAddress: entity.locationAddress ?? null,
+            locationLatitude: entity.locationLatitude ?? null,
+            locationLongitude: entity.locationLongitude ?? null,
         };
     }
 }

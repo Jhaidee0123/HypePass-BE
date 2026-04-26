@@ -65,6 +65,16 @@ export class InitiateCheckoutDto {
     @IsString()
     @IsIn(['CC', 'CE', 'NIT', 'PP', 'TI'])
     customerLegalIdType: string;
+
+    @ApiPropertyOptional({
+        description:
+            'Promoter referral code captured from the event link. Tracked-only; ignored silently if invalid.',
+        maxLength: 20,
+    })
+    @IsOptional()
+    @IsString()
+    @MaxLength(20)
+    referralCode?: string;
 }
 
 /** Guest variant — same fields, but name + email are REQUIRED (no session). */
@@ -135,4 +145,14 @@ export class GuestInitiateCheckoutDto {
         message: 'acceptedPrivacyVersion must match YYYY-MM-vN',
     })
     acceptedPrivacyVersion: string;
+
+    @ApiPropertyOptional({
+        description:
+            'Promoter referral code captured from the event link. Tracked-only; ignored silently if invalid.',
+        maxLength: 20,
+    })
+    @IsOptional()
+    @IsString()
+    @MaxLength(20)
+    referralCode?: string;
 }

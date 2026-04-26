@@ -95,4 +95,38 @@ export class EventOrmEntity extends BaseOrmEntity {
         nullable: true,
     })
     maxTicketsPerUserPerSession: number | null;
+
+    // ===== Free-form location (organizer types/searches in Maps) =====
+    // Replaces the curated `venues` catalog for new events. `venueId` is kept
+    // nullable for back-compat with legacy events.
+
+    @Column('varchar', { name: 'location_name', length: 200, nullable: true })
+    locationName: string | null;
+
+    @Column('varchar', { name: 'location_address', length: 400, nullable: true })
+    locationAddress: string | null;
+
+    @Column('numeric', {
+        name: 'location_latitude',
+        precision: 10,
+        scale: 7,
+        nullable: true,
+        transformer: {
+            to: (v: number | null | undefined) => (v == null ? null : v),
+            from: (v: string | null) => (v == null ? null : Number(v)),
+        },
+    })
+    locationLatitude: number | null;
+
+    @Column('numeric', {
+        name: 'location_longitude',
+        precision: 10,
+        scale: 7,
+        nullable: true,
+        transformer: {
+            to: (v: number | null | undefined) => (v == null ? null : v),
+            from: (v: string | null) => (v == null ? null : Number(v)),
+        },
+    })
+    locationLongitude: number | null;
 }

@@ -65,6 +65,7 @@ import {
     get_event_for_review_usecase_token,
     get_event_usecase_token,
     list_events_by_company_usecase_token,
+    admin_list_events_usecase_token,
     list_pending_events_usecase_token,
     publish_event_usecase_token,
     reject_event_usecase_token,
@@ -80,6 +81,14 @@ import {
     update_session_usecase_token,
     list_public_events_usecase_token,
     get_public_event_usecase_token,
+    event_promoter_service_token,
+    assign_event_promoters_usecase_token,
+    list_event_promoters_usecase_token,
+    revoke_event_promoter_usecase_token,
+    list_my_promoted_events_usecase_token,
+    get_promoter_sales_usecase_token,
+    list_event_attendees_usecase_token,
+    list_my_staff_events_usecase_token,
 } from './infrastructure/tokens/events.tokens';
 import { CreateEventUseCase } from './application/use-case/create-event.usecase';
 import { ListEventsByCompanyUseCase } from './application/use-case/list-events-by-company.usecase';
@@ -87,6 +96,7 @@ import { GetEventUseCase } from './application/use-case/get-event.usecase';
 import { UpdateEventUseCase } from './application/use-case/update-event.usecase';
 import { DeleteEventUseCase } from './application/use-case/delete-event.usecase';
 import { SubmitEventForReviewUseCase } from './application/use-case/submit-event-for-review.usecase';
+import { AdminNotificationService } from '../admin-notifications/application/services/admin-notification.service';
 import { GetEventSalesSummaryUseCase } from './application/use-case/get-event-sales-summary.usecase';
 import { IssueCourtesiesUseCase } from './application/use-case/issue-courtesies.usecase';
 import { AssignEventStaffUseCase } from './application/use-case/assign-event-staff.usecase';
@@ -104,6 +114,7 @@ import { DeletePhaseUseCase } from './application/use-case/delete-phase.usecase'
 import { AddEventMediaUseCase } from './application/use-case/add-event-media.usecase';
 import { RemoveEventMediaUseCase } from './application/use-case/remove-event-media.usecase';
 import { ListPendingEventsUseCase } from './application/use-case/admin/list-pending-events.usecase';
+import { AdminListEventsUseCase } from './application/use-case/admin/list-all-events.usecase';
 import { GetEventForReviewUseCase } from './application/use-case/admin/get-event-for-review.usecase';
 import { ApproveEventUseCase } from './application/use-case/admin/approve-event.usecase';
 import { RejectEventUseCase } from './application/use-case/admin/reject-event.usecase';
@@ -112,6 +123,17 @@ import { UnpublishEventUseCase } from './application/use-case/admin/unpublish-ev
 import { RotateEventQrUseCase } from './application/use-case/admin/rotate-event-qr.usecase';
 import { ListPublicEventsUseCase } from './application/use-case/public/list-public-events.usecase';
 import { GetPublicEventUseCase } from './application/use-case/public/get-public-event.usecase';
+import { EventPromoterOrmEntity } from './infrastructure/orm/event-promoter.orm.entity';
+import { EventPromoterService } from './application/services/event-promoter.service';
+import { AssignEventPromotersUseCase } from './application/use-case/assign-event-promoters.usecase';
+import { ListEventPromotersUseCase } from './application/use-case/list-event-promoters.usecase';
+import { RevokeEventPromoterUseCase } from './application/use-case/revoke-event-promoter.usecase';
+import { ListMyPromotedEventsUseCase } from './application/use-case/list-my-promoted-events.usecase';
+import { GetPromoterSalesUseCase } from './application/use-case/get-promoter-sales.usecase';
+import { ListEventAttendeesUseCase } from './application/use-case/list-event-attendees.usecase';
+import { ListMyStaffEventsUseCase } from './application/use-case/list-my-staff-events.usecase';
+import { PromoterController } from './infrastructure/controllers/promoter.controller';
+import { StaffController } from './infrastructure/controllers/staff.controller';
 
 @Module({
     imports: [
@@ -123,6 +145,7 @@ import { GetPublicEventUseCase } from './application/use-case/public/get-public-
             EventMediaOrmEntity,
             EventPublicationReviewOrmEntity,
             EventStaffOrmEntity,
+            EventPromoterOrmEntity,
         ]),
         CompaniesModule,
         UsersModule,
@@ -301,6 +324,101 @@ import { GetPublicEventUseCase } from './application/use-case/public/get-public-
                 AuditLogService,
             ],
         },
+        // promoter
+        { provide: event_promoter_service_token, useClass: EventPromoterService },
+        {
+            provide: assign_event_promoters_usecase_token,
+            useFactory: (
+                ev: EventService,
+                promoter: EventPromoterService,
+                users: UserService,
+                email: EmailService,
+                audit: AuditLogService,
+                auth: any,
+            ) =>
+                new AssignEventPromotersUseCase(
+                    ev,
+                    promoter,
+                    users,
+                    email,
+                    audit,
+                    auth,
+                ),
+            inject: [
+                event_service_token,
+                event_promoter_service_token,
+                user_service_token,
+                EmailService,
+                AuditLogService,
+                BETTER_AUTH,
+            ],
+        },
+        {
+            provide: list_event_promoters_usecase_token,
+            useFactory: (
+                ev: EventService,
+                promoter: EventPromoterService,
+                users: UserService,
+                ds: DataSource,
+            ) => new ListEventPromotersUseCase(ev, promoter, users, ds),
+            inject: [
+                event_service_token,
+                event_promoter_service_token,
+                user_service_token,
+                DataSource,
+            ],
+        },
+        {
+            provide: revoke_event_promoter_usecase_token,
+            useFactory: (
+                ev: EventService,
+                promoter: EventPromoterService,
+                audit: AuditLogService,
+            ) => new RevokeEventPromoterUseCase(ev, promoter, audit),
+            inject: [
+                event_service_token,
+                event_promoter_service_token,
+                AuditLogService,
+            ],
+        },
+        {
+            provide: list_my_promoted_events_usecase_token,
+            useFactory: (
+                ev: EventService,
+                promoter: EventPromoterService,
+                ds: DataSource,
+            ) => new ListMyPromotedEventsUseCase(ev, promoter, ds),
+            inject: [
+                event_service_token,
+                event_promoter_service_token,
+                DataSource,
+            ],
+        },
+        {
+            provide: get_promoter_sales_usecase_token,
+            useFactory: (
+                ev: EventService,
+                promoter: EventPromoterService,
+                ds: DataSource,
+            ) => new GetPromoterSalesUseCase(ev, promoter, ds),
+            inject: [
+                event_service_token,
+                event_promoter_service_token,
+                DataSource,
+            ],
+        },
+        {
+            provide: list_event_attendees_usecase_token,
+            useFactory: (ev: EventService, ds: DataSource) =>
+                new ListEventAttendeesUseCase(ev, ds),
+            inject: [event_service_token, DataSource],
+        },
+        {
+            provide: list_my_staff_events_usecase_token,
+            useFactory: (ev: EventService, staff: EventStaffService) =>
+                new ListMyStaffEventsUseCase(ev, staff),
+            inject: [event_service_token, event_staff_service_token],
+        },
         {
             provide: submit_event_for_review_usecase_token,
             useFactory: (
@@ -310,6 +428,7 @@ import { GetPublicEventUseCase } from './application/use-case/public/get-public-
                 ph: TicketSalePhaseService,
                 rev: EventPublicationReviewService,
                 email: EmailService,
+                adminNotifications: AdminNotificationService,
             ) =>
                 new SubmitEventForReviewUseCase(
                     ev,
@@ -318,6 +437,7 @@ import { GetPublicEventUseCase } from './application/use-case/public/get-public-
                     ph,
                     rev,
                     email,
+                    adminNotifications,
                 ),
             inject: [
                 event_service_token,
@@ -326,6 +446,7 @@ import { GetPublicEventUseCase } from './application/use-case/public/get-public-
                 ticket_sale_phase_service_token,
                 event_publication_review_service_token,
                 EmailService,
+                AdminNotificationService,
             ],
         },
 
@@ -463,6 +584,11 @@ import { GetPublicEventUseCase } from './application/use-case/public/get-public-
             provide: list_pending_events_usecase_token,
             useFactory: (ev: EventService) =>
                 new ListPendingEventsUseCase(ev),
+            inject: [event_service_token],
+        },
+        {
+            provide: admin_list_events_usecase_token,
+            useFactory: (ev: EventService) => new AdminListEventsUseCase(ev),
             inject: [event_service_token],
         },
         {
@@ -609,6 +735,8 @@ import { GetPublicEventUseCase } from './application/use-case/public/get-public-
         OrganizerEventsController,
         AdminEventsController,
         PublicEventsController,
+        PromoterController,
+        StaffController,
     ],
     exports: [
         event_service_token,
@@ -618,6 +746,7 @@ import { GetPublicEventUseCase } from './application/use-case/public/get-public-
         event_media_service_token,
         event_publication_review_service_token,
         event_staff_service_token,
+        event_promoter_service_token,
     ],
 })
 export class EventsModule {}

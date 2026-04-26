@@ -24,7 +24,7 @@ export const envValidationSchema = Joi.object({
   WOMPI_API_URL: Joi.string().default('https://sandbox.wompi.co/v1'),
 
   RESEND_API_KEY: Joi.string().required(),
-  RESEND_FROM_EMAIL: Joi.string().default('HypePass <no-reply@hypepass.com>'),
+  RESEND_FROM_EMAIL: Joi.string().default('HypePass <no-reply@hypepass.co>'),
 
   ADMIN_NOTIFICATION_EMAILS: Joi.string().required(),
 

@@ -81,6 +81,13 @@ export class ApproveEventUseCase {
             transferEnabled: event.transferEnabled,
             defaultQrVisibleHoursBefore: event.defaultQrVisibleHoursBefore,
             currency: event.currency,
+            resalePriceCapMultiplier: event.resalePriceCapMultiplier,
+            resaleFeePct: event.resaleFeePct,
+            maxTicketsPerUserPerSession: event.maxTicketsPerUserPerSession,
+            locationName: event.locationName,
+            locationAddress: event.locationAddress,
+            locationLatitude: event.locationLatitude,
+            locationLongitude: event.locationLongitude,
             updatedAt: new Date(),
         });
         const saved = await this.eventRepo.update(next);

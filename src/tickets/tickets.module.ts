@@ -14,7 +14,13 @@ import { InventoryHoldService } from './application/services/inventory-hold.serv
 import { TicketQrTokenService } from './application/services/ticket-qr-token.service';
 import { CheckinService } from './application/services/checkin.service';
 import { TicketTransferService } from './application/services/ticket-transfer.service';
+import { AdminOrderService } from './application/services/admin-order.service';
+import { AdminMarkOrderReconciledUseCase } from './application/use-case/admin-mark-reconciled.usecase';
+import { AdminOrdersController } from './infrastructure/controllers/admin-orders.controller';
+import { AuditLogService } from '../audit/application/services/audit-log.service';
 import {
+    admin_mark_order_reconciled_usecase_token,
+    admin_order_service_token,
     checkin_service_token,
     inventory_hold_service_token,
     order_item_service_token,
@@ -53,7 +59,15 @@ import {
             provide: ticket_transfer_service_token,
             useClass: TicketTransferService,
         },
+        { provide: admin_order_service_token, useClass: AdminOrderService },
+        {
+            provide: admin_mark_order_reconciled_usecase_token,
+            useFactory: (svc: AdminOrderService, audit: AuditLogService) =>
+                new AdminMarkOrderReconciledUseCase(svc, audit),
+            inject: [admin_order_service_token, AuditLogService],
+        },
     ],
+    controllers: [AdminOrdersController],
     exports: [
         order_service_token,
         order_item_service_token,

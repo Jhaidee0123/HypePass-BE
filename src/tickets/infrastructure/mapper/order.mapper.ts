@@ -25,6 +25,7 @@ export class OrderMapper {
             buyerLegalIdType: orm.buyerLegalIdType,
             needsReconciliation: orm.needsReconciliation ?? false,
             reconciliationReason: orm.reconciliationReason,
+            promoterReferralCode: orm.promoterReferralCode ?? null,
             createdAt: orm.createdAt,
             updatedAt: orm.updatedAt,
         });
@@ -53,6 +54,7 @@ export class OrderMapper {
             buyerLegalIdType: entity.buyerLegalIdType ?? null,
             needsReconciliation: entity.needsReconciliation ?? false,
             reconciliationReason: entity.reconciliationReason ?? null,
+            promoterReferralCode: entity.promoterReferralCode ?? null,
         };
     }
 }

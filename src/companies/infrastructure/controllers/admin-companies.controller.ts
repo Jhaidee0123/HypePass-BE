@@ -11,15 +11,22 @@ import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { Roles, Session } from '../../../auth/decorators';
 import { SYSTEM_ROLES, UserSession } from '../../../auth';
 import { ReviewCompanyDto } from '../../application/dto/review-company.dto';
+import { SuspendCompanyDto } from '../../application/dto/suspend-company.dto';
 import { CompanyStatus } from '../../domain/types/company-status';
 import {
     approve_company_usecase_token,
     list_companies_usecase_token,
+    reinstate_company_usecase_token,
     reject_company_usecase_token,
+    suspend_company_usecase_token,
 } from '../tokens/companies.tokens';
 import { ListCompaniesUseCase } from '../../application/use-case/list-companies.usecase';
 import { ApproveCompanyUseCase } from '../../application/use-case/approve-company.usecase';
 import { RejectCompanyUseCase } from '../../application/use-case/reject-company.usecase';
+import {
+    ReinstateCompanyUseCase,
+    SuspendCompanyUseCase,
+} from '../../application/use-case/suspend-company.usecase';
 
 @ApiTags('Admin — Companies')
 @ApiCookieAuth()
@@ -33,11 +40,15 @@ export class AdminCompaniesController {
         private readonly approveCompany: ApproveCompanyUseCase,
         @Inject(reject_company_usecase_token)
         private readonly rejectCompany: RejectCompanyUseCase,
+        @Inject(suspend_company_usecase_token)
+        private readonly suspendCompany: SuspendCompanyUseCase,
+        @Inject(reinstate_company_usecase_token)
+        private readonly reinstateCompany: ReinstateCompanyUseCase,
     ) {}
 
     @Get()
-    list(@Query('status') status?: CompanyStatus) {
-        return this.listCompanies.execute({ status });
+    list(@Query('status') status?: CompanyStatus, @Query('search') search?: string) {
+        return this.listCompanies.execute({ status, search });
     }
 
     @Patch(':companyId/approve')
@@ -60,5 +71,22 @@ export class AdminCompaniesController {
         @Session() session: UserSession,
     ) {
         return this.rejectCompany.execute(companyId, session.user.id, dto);
+    }
+
+    @Patch(':companyId/suspend')
+    suspend(
+        @Param('companyId') companyId: string,
+        @Body() dto: SuspendCompanyDto,
+        @Session() session: UserSession,
+    ) {
+        return this.suspendCompany.execute(companyId, session.user.id, dto.reason);
+    }
+
+    @Patch(':companyId/reinstate')
+    reinstate(
+        @Param('companyId') companyId: string,
+        @Session() session: UserSession,
+    ) {
+        return this.reinstateCompany.execute(companyId, session.user.id);
     }
 }

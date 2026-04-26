@@ -32,6 +32,7 @@ import { OWNABLE_TICKET_STATUSES } from '../../../tickets/domain/types/ticket-st
 import { InitiateCheckoutDto } from '../dto/initiate-checkout.dto';
 import { InitiateCheckoutResponse } from '../types/initiate-checkout-response';
 import { computePricing, makePaymentReference } from './helpers/pricing';
+import { EventPromoterService } from '../../../events/application/services/event-promoter.service';
 
 export type InitiateCheckoutInput = {
     userId: string;
@@ -40,6 +41,7 @@ export type InitiateCheckoutInput = {
     buyerPhone: string;
     buyerLegalId: string;
     buyerLegalIdType: string;
+    referralCode?: string;
     selection: Pick<
         InitiateCheckoutDto,
         | 'eventId'
@@ -73,6 +75,7 @@ export class InitiateCheckoutUseCase {
             platformFeePct: number;
             holdMinutes: number;
         },
+        private readonly promoterService: EventPromoterService,
     ) {}
 
     async execute(
@@ -202,6 +205,20 @@ export class InitiateCheckoutUseCase {
                 );
             }
 
+            // Validate optional promoter referral code: lookup active promoter
+            // for this event with the given code. Invalid codes are silently
+            // ignored so a typo never blocks the buyer's checkout.
+            let promoterReferralCode: string | null = null;
+            if (input.referralCode && input.referralCode.trim().length > 0) {
+                const code = input.referralCode.trim().toUpperCase();
+                const promoter =
+                    await this.promoterService.findActiveByEventAndCode(
+                        event.id,
+                        code,
+                    );
+                if (promoter) promoterReferralCode = promoter.referralCode;
+            }
+
             const order = new OrderEntity({
                 userId,
                 companyId: event.companyId,
@@ -221,6 +238,7 @@ export class InitiateCheckoutUseCase {
                 buyerPhone: input.buyerPhone,
                 buyerLegalId: input.buyerLegalId,
                 buyerLegalIdType: input.buyerLegalIdType,
+                promoterReferralCode,
             });
             const savedOrder = await this.orderRepo.create(order);
             createdOrderId = savedOrder.id;

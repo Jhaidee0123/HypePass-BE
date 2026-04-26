@@ -12,7 +12,7 @@ import { InitiateCheckoutUseCase } from './initiate-checkout.usecase';
  * Guest checkout = same flow as authenticated, but we first ensure the user
  * exists in Better Auth so the ticket has a real owner. If the email is new,
  * we create the account with a strong random password (never surfaced) and
- * then kick off a Better Auth `forgetPassword` so the user receives a reset
+ * then kick off a Better Auth `requestPasswordReset` so the user receives a reset
  * link to set their own password. A separate welcome email points them at
  * their wallet.
  */
@@ -57,6 +57,7 @@ export class InitiateGuestCheckoutUseCase {
             buyerPhone: dto.customerPhone,
             buyerLegalId: dto.customerLegalId,
             buyerLegalIdType: dto.customerLegalIdType,
+            referralCode: dto.referralCode,
             selection: {
                 eventId: dto.eventId,
                 eventSessionId: dto.eventSessionId,
@@ -118,15 +119,15 @@ export class InitiateGuestCheckoutUseCase {
 
     private async sendSetPasswordLink(email: string): Promise<void> {
         try {
-            const redirectTo = `${process.env.APP_URL ?? ''}/login`;
-            await this.auth.api.forgetPassword({
+            const redirectTo = `${process.env.APP_URL ?? ''}/reset-password`;
+            await this.auth.api.requestPasswordReset({
                 body: { email, redirectTo },
                 asResponse: false,
             });
         } catch (err: any) {
             // Non-fatal: the welcome email still tells the user what happened.
             this.logger.warn(
-                `forgetPassword for guest ${email} failed: ${err?.message ?? 'unknown'}`,
+                `requestPasswordReset for guest ${email} failed: ${err?.message ?? 'unknown'}`,
             );
         }
     }

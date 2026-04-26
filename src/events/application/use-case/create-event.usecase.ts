@@ -38,6 +38,10 @@ export class CreateEventUseCase {
             resaleFeePct: dto.resaleFeePct ?? null,
             maxTicketsPerUserPerSession:
                 dto.maxTicketsPerUserPerSession ?? null,
+            locationName: dto.locationName ?? null,
+            locationAddress: dto.locationAddress ?? null,
+            locationLatitude: dto.locationLatitude ?? null,
+            locationLongitude: dto.locationLongitude ?? null,
         });
         return this.repo.create(event);
     }

@@ -72,4 +72,12 @@ export class OrderOrmEntity extends BaseOrmEntity {
         nullable: true,
     })
     reconciliationReason: string | null;
+
+    @Index()
+    @Column('varchar', {
+        name: 'promoter_referral_code',
+        length: 20,
+        nullable: true,
+    })
+    promoterReferralCode: string | null;
 }

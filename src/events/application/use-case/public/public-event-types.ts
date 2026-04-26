@@ -20,6 +20,13 @@ export type PublicEventListItem = {
         city: string;
         country: string;
     } | null;
+    /** Free-form location captured by the organizer (newer events). */
+    location: {
+        name: string | null;
+        address: string | null;
+        latitude: number | null;
+        longitude: number | null;
+    } | null;
     nextSessionStartsAt: string | null;
     fromPrice: number | null;
     currency: string;

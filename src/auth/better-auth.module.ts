@@ -76,14 +76,14 @@ import { importEsm } from './esm-loader';
                             user: any;
                             url: string;
                         }) => {
+                            const fromEmail = config.get<string>(
+                                'RESEND_FROM_EMAIL',
+                                'HypePass <no-reply@hypepass.co>',
+                            );
                             try {
                                 const { Resend } = await importEsm('resend');
                                 const resend = new Resend(
                                     config.get<string>('RESEND_API_KEY'),
-                                );
-                                const fromEmail = config.get<string>(
-                                    'RESEND_FROM_EMAIL',
-                                    'HypePass <no-reply@hypepass.com>',
                                 );
 
                                 const html = `
@@ -110,15 +110,25 @@ import { importEsm } from './esm-loader';
 </body>
 </html>`;
 
-                                await resend.emails.send({
+                                const result = await resend.emails.send({
                                     from: fromEmail,
                                     to: user.email,
                                     subject: 'HypePass — Restablecer contraseña',
                                     html,
                                 });
+                                if (result?.error) {
+                                    console.error(
+                                        `[BetterAuth] Resend rejected reset email to ${user.email} (from=${fromEmail}): ${JSON.stringify(result.error)}`,
+                                    );
+                                } else {
+                                    console.log(
+                                        `[BetterAuth] Reset email sent to ${user.email} via Resend (id=${result?.data?.id ?? '?'}, from=${fromEmail})`,
+                                    );
+                                }
                             } catch (err: any) {
                                 console.error(
-                                    `[BetterAuth] Error enviando reset email: ${err.message}`,
+                                    `[BetterAuth] Error enviando reset email a ${user.email} (from=${fromEmail}): ${err?.message ?? 'unknown'}`,
+                                    err?.stack,
                                 );
                             }
                         },

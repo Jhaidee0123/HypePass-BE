@@ -66,6 +66,22 @@ export class UpdateEventUseCase {
             maxTicketsPerUserPerSession:
                 dto.maxTicketsPerUserPerSession ??
                 current.maxTicketsPerUserPerSession,
+            locationName:
+                dto.locationName !== undefined
+                    ? dto.locationName
+                    : current.locationName,
+            locationAddress:
+                dto.locationAddress !== undefined
+                    ? dto.locationAddress
+                    : current.locationAddress,
+            locationLatitude:
+                dto.locationLatitude !== undefined
+                    ? dto.locationLatitude
+                    : current.locationLatitude,
+            locationLongitude:
+                dto.locationLongitude !== undefined
+                    ? dto.locationLongitude
+                    : current.locationLongitude,
             updatedAt: new Date(),
         });
         return this.repo.update(next);

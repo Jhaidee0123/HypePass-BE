@@ -184,14 +184,14 @@ export class AssignEventStaffUseCase {
 
     private async sendSetPasswordLink(email: string): Promise<void> {
         try {
-            const redirectTo = `${process.env.APP_URL ?? ''}/login`;
-            await this.auth.api.forgetPassword({
+            const redirectTo = `${process.env.APP_URL ?? ''}/reset-password`;
+            await this.auth.api.requestPasswordReset({
                 body: { email, redirectTo },
                 asResponse: false,
             });
         } catch (err: any) {
             this.logger.warn(
-                `forgetPassword for staff ${email} failed: ${err?.message ?? 'unknown'}`,
+                `requestPasswordReset for staff ${email} failed: ${err?.message ?? 'unknown'}`,
             );
         }
     }

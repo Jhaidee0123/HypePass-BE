@@ -22,4 +22,5 @@ export type OrderProps = BaseProps & {
     buyerLegalIdType?: string | null;
     needsReconciliation?: boolean;
     reconciliationReason?: string | null;
+    promoterReferralCode?: string | null;
 };

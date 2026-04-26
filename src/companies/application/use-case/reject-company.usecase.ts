@@ -66,7 +66,7 @@ export class RejectCompanyUseCase {
 <h2 style="margin:0 0 16px;font-size:22px;color:#faf7f0;">Revisión de compañía</h2>
 <p style="margin:0 0 14px;color:#bfbab1;">La revisión de <strong style="color:#faf7f0;">${company.name}</strong> no resultó aprobada en este momento.</p>
 ${notes ? `<p style="margin:0 0 14px;color:#bfbab1;">Notas del revisor: <em>${notes}</em></p>` : ''}
-<p style="margin:0 0 14px;color:#bfbab1;">Revisa las notas, ajusta lo necesario y vuelve a enviar. Estamos para ayudarte en <a href="mailto:support@hypepass.com" style="color:#d7ff3a;">support@hypepass.com</a>.</p>
+<p style="margin:0 0 14px;color:#bfbab1;">Revisa las notas, ajusta lo necesario y vuelve a enviar. Estamos para ayudarte en <a href="mailto:hola@hypepass.co" style="color:#d7ff3a;">hola@hypepass.co</a>.</p>
 `.trim();
             await this.email.send({
                 to: recipients,

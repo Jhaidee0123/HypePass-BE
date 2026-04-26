@@ -20,8 +20,10 @@ import {
     list_companies_usecase_token,
     list_members_usecase_token,
     list_my_companies_usecase_token,
+    reinstate_company_usecase_token,
     reject_company_usecase_token,
     remove_member_usecase_token,
+    suspend_company_usecase_token,
 } from './infrastructure/tokens/companies.tokens';
 import { CreateCompanyUseCase } from './application/use-case/create-company.usecase';
 import { ListCompaniesUseCase } from './application/use-case/list-companies.usecase';
@@ -31,6 +33,11 @@ import { RejectCompanyUseCase } from './application/use-case/reject-company.usec
 import { AddMemberUseCase } from './application/use-case/add-member.usecase';
 import { ListMembersUseCase } from './application/use-case/list-members.usecase';
 import { RemoveMemberUseCase } from './application/use-case/remove-member.usecase';
+import {
+    ReinstateCompanyUseCase,
+    SuspendCompanyUseCase,
+} from './application/use-case/suspend-company.usecase';
+import { AdminNotificationService } from '../admin-notifications/application/services/admin-notification.service';
 
 @Module({
     imports: [
@@ -51,9 +58,18 @@ import { RemoveMemberUseCase } from './application/use-case/remove-member.usecas
             useFactory: (
                 companyService: CompanyService,
                 membershipService: CompanyMembershipService,
+                adminNotifications: AdminNotificationService,
             ) =>
-                new CreateCompanyUseCase(companyService, membershipService),
-            inject: [company_service_token, company_membership_service_token],
+                new CreateCompanyUseCase(
+                    companyService,
+                    membershipService,
+                    adminNotifications,
+                ),
+            inject: [
+                company_service_token,
+                company_membership_service_token,
+                AdminNotificationService,
+            ],
         },
         {
             provide: list_companies_usecase_token,
@@ -146,6 +162,18 @@ import { RemoveMemberUseCase } from './application/use-case/remove-member.usecas
             useFactory: (s: CompanyMembershipService) =>
                 new RemoveMemberUseCase(s),
             inject: [company_membership_service_token],
+        },
+        {
+            provide: suspend_company_usecase_token,
+            useFactory: (svc: CompanyService, audit: AuditLogService) =>
+                new SuspendCompanyUseCase(svc, audit),
+            inject: [company_service_token, AuditLogService],
+        },
+        {
+            provide: reinstate_company_usecase_token,
+            useFactory: (svc: CompanyService, audit: AuditLogService) =>
+                new ReinstateCompanyUseCase(svc, audit),
+            inject: [company_service_token, AuditLogService],
         },
         TenantGuard,
     ],

@@ -5,6 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { LoggerModule } from 'nestjs-pino';
+import pino from 'pino';
+import { logBufferStream } from './admin/infrastructure/streams/log-buffer';
 import { envValidationSchema } from './config/env.validation';
 import databaseConfig from './config/database.config';
 import { BetterAuthModule } from './auth/better-auth.module';
@@ -25,6 +27,11 @@ import { SweepersModule } from './sweepers/sweepers.module';
 import { AuditModule } from './audit/audit.module';
 import { PayoutMethodsModule } from './payout-methods/payout-methods.module';
 import { ConsentsModule } from './consents/consents.module';
+import { PlatformSettingsModule } from './platform-settings/platform-settings.module';
+import { AnalyticsModule } from './analytics/analytics.module';
+import { AdminNotificationsModule } from './admin-notifications/admin-notifications.module';
+import { SupportModule } from './support/support.module';
+import { AdminModule } from './admin/admin.module';
 import { DomainExceptionFilter } from './shared/infrastructure/filters/domain-exception.filter';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -42,9 +49,19 @@ import { AppService } from './app.service';
             inject: [ConfigService],
             useFactory: (config: ConfigService) => {
                 const prod = config.get<string>('NODE_ENV') === 'production';
+                const level = prod ? 'info' : 'debug';
+                // In dev, pino-pretty is a worker transport — incompatible with multistream,
+                // so we keep stdout pretty-printing and skip the in-memory buffer there.
+                // In prod, JSON to stdout + JSON tee to logBufferStream so admin UI can read.
+                const stream = prod
+                    ? pino.multistream([
+                          { stream: process.stdout },
+                          { stream: logBufferStream },
+                      ])
+                    : undefined;
                 return {
                     pinoHttp: {
-                        level: prod ? 'info' : 'debug',
+                        level,
                         redact: {
                             paths: [
                                 'req.headers.authorization',
@@ -76,6 +93,7 @@ import { AppService } from './app.service';
                                       ignore: 'pid,hostname,req.headers',
                                   },
                               },
+                        stream,
                     },
                 };
             },
@@ -113,6 +131,8 @@ import { AppService } from './app.service';
 
         SharedModule,
         AuditModule,
+        AdminNotificationsModule,
+        PlatformSettingsModule,
         BetterAuthModule,
         UsersModule,
         CompaniesModule,
@@ -127,8 +147,11 @@ import { AppService } from './app.service';
         TransferModule,
         PayoutMethodsModule,
         ConsentsModule,
+        AdminModule,
         MarketplaceModule,
         SweepersModule,
+        AnalyticsModule,
+        SupportModule,
     ],
     controllers: [AppController],
     providers: [

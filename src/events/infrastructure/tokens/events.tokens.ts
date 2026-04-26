@@ -107,3 +107,32 @@ export const unpublish_event_usecase_token = Symbol(
 export const rotate_event_qr_usecase_token = Symbol(
     'ROTATE_EVENT_QR_USECASE_TOKEN',
 );
+export const admin_list_events_usecase_token = Symbol(
+    'ADMIN_LIST_EVENTS_USECASE_TOKEN',
+);
+
+// ===== promoter use cases =====
+export const event_promoter_service_token = Symbol(
+    'EVENT_PROMOTER_SERVICE_TOKEN',
+);
+export const assign_event_promoters_usecase_token = Symbol(
+    'ASSIGN_EVENT_PROMOTERS_USECASE_TOKEN',
+);
+export const list_event_promoters_usecase_token = Symbol(
+    'LIST_EVENT_PROMOTERS_USECASE_TOKEN',
+);
+export const revoke_event_promoter_usecase_token = Symbol(
+    'REVOKE_EVENT_PROMOTER_USECASE_TOKEN',
+);
+export const list_my_promoted_events_usecase_token = Symbol(
+    'LIST_MY_PROMOTED_EVENTS_USECASE_TOKEN',
+);
+export const get_promoter_sales_usecase_token = Symbol(
+    'GET_PROMOTER_SALES_USECASE_TOKEN',
+);
+export const list_event_attendees_usecase_token = Symbol(
+    'LIST_EVENT_ATTENDEES_USECASE_TOKEN',
+);
+export const list_my_staff_events_usecase_token = Symbol(
+    'LIST_MY_STAFF_EVENTS_USECASE_TOKEN',
+);

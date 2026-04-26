@@ -1,5 +1,6 @@
 import { UnprocessableDomainException } from '../../../shared/infrastructure/filters/domain.exception';
 import { EmailService } from '../../../shared/infrastructure/services/email.service';
+import { AdminNotificationService } from '../../../admin-notifications/application/services/admin-notification.service';
 import { EventEntity } from '../../domain/entities/event.entity';
 import { EventPublicationReviewEntity } from '../../domain/entities/event-publication-review.entity';
 import { IEventRepository } from '../../domain/repositories/event.repository';
@@ -20,6 +21,7 @@ export class SubmitEventForReviewUseCase {
         private readonly phaseRepo: ITicketSalePhaseRepository,
         private readonly reviewRepo: IEventPublicationReviewRepository,
         private readonly email: EmailService,
+        private readonly adminNotifications: AdminNotificationService,
     ) {}
 
     async execute(
@@ -95,6 +97,13 @@ export class SubmitEventForReviewUseCase {
             transferEnabled: current.transferEnabled,
             defaultQrVisibleHoursBefore: current.defaultQrVisibleHoursBefore,
             currency: current.currency,
+            resalePriceCapMultiplier: current.resalePriceCapMultiplier,
+            resaleFeePct: current.resaleFeePct,
+            maxTicketsPerUserPerSession: current.maxTicketsPerUserPerSession,
+            locationName: current.locationName,
+            locationAddress: current.locationAddress,
+            locationLatitude: current.locationLatitude,
+            locationLongitude: current.locationLongitude,
             updatedAt: now,
         });
         const saved = await this.eventRepo.update(next);
@@ -113,6 +122,13 @@ export class SubmitEventForReviewUseCase {
         );
 
         await this.notifyAdmins(saved);
+        void this.adminNotifications.record({
+            kind: 'event.submitted',
+            level: 'info',
+            title: `Evento en revisión: ${saved.title}`,
+            body: `/${saved.slug} está esperando aprobación.`,
+            metadata: { eventId: saved.id, slug: saved.slug },
+        });
 
         return saved;
     }

@@ -23,3 +23,9 @@ export const list_members_usecase_token = Symbol('LIST_MEMBERS_USECASE_TOKEN');
 export const remove_member_usecase_token = Symbol(
     'REMOVE_MEMBER_USECASE_TOKEN',
 );
+export const suspend_company_usecase_token = Symbol(
+    'SUSPEND_COMPANY_USECASE_TOKEN',
+);
+export const reinstate_company_usecase_token = Symbol(
+    'REINSTATE_COMPANY_USECASE_TOKEN',
+);

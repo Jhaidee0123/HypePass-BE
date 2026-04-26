@@ -66,6 +66,7 @@ export class CheckoutController {
             buyerPhone: dto.customerPhone,
             buyerLegalId: dto.customerLegalId,
             buyerLegalIdType: dto.customerLegalIdType,
+            referralCode: dto.referralCode,
             selection: {
                 eventId: dto.eventId,
                 eventSessionId: dto.eventSessionId,

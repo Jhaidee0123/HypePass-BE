@@ -16,6 +16,7 @@ import {
     RejectEventDto,
 } from '../../application/dto/admin-review-event.dto';
 import {
+    admin_list_events_usecase_token,
     approve_event_usecase_token,
     get_event_for_review_usecase_token,
     list_pending_events_usecase_token,
@@ -25,6 +26,7 @@ import {
     unpublish_event_usecase_token,
 } from '../tokens/events.tokens';
 import { ListPendingEventsUseCase } from '../../application/use-case/admin/list-pending-events.usecase';
+import { AdminListEventsUseCase } from '../../application/use-case/admin/list-all-events.usecase';
 import { GetEventForReviewUseCase } from '../../application/use-case/admin/get-event-for-review.usecase';
 import { ApproveEventUseCase } from '../../application/use-case/admin/approve-event.usecase';
 import { RejectEventUseCase } from '../../application/use-case/admin/reject-event.usecase';
@@ -52,11 +54,22 @@ export class AdminEventsController {
         private readonly unpublishEvent: UnpublishEventUseCase,
         @Inject(rotate_event_qr_usecase_token)
         private readonly rotateEventQr: RotateEventQrUseCase,
+        @Inject(admin_list_events_usecase_token)
+        private readonly listAll: AdminListEventsUseCase,
     ) {}
 
     @Get()
     list(@Query('status') status?: EventStatus) {
         return this.listPending.execute(status);
+    }
+
+    @Get('master')
+    listMaster(
+        @Query('status') status?: EventStatus,
+        @Query('companyId') companyId?: string,
+        @Query('search') search?: string,
+    ) {
+        return this.listAll.execute({ status, companyId, search });
     }
 
     @Get(':eventId')
