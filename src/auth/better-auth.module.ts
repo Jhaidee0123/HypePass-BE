@@ -5,6 +5,7 @@ import { BetterAuthGuard } from './better-auth.guard';
 import { BetterAuthController } from './auth.controller';
 import { BETTER_AUTH } from './constants';
 import { importEsm } from './esm-loader';
+import { wrapInHypePassTemplate } from '../shared/infrastructure/templates/hypepass-template';
 
 @Global()
 @Module({
@@ -86,29 +87,15 @@ import { importEsm } from './esm-loader';
                                     config.get<string>('RESEND_API_KEY'),
                                 );
 
-                                const html = `
-<!DOCTYPE html>
-<html lang="es">
-<head><meta charset="UTF-8"></head>
-<body style="margin:0;padding:0;background:#000;font-family:'Space Grotesk',system-ui,sans-serif;color:#ece8e0;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#000;padding:32px 16px;">
-    <tr><td align="center">
-      <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#0a0908;border:1px solid #34312c;border-radius:4px;">
-        <tr><td style="padding:48px 40px;">
-          <h1 style="margin:0 0 8px;font-family:'Bebas Neue',Impact,sans-serif;font-size:40px;letter-spacing:0.04em;color:#d7ff3a;">HYPEPASS</h1>
-          <h2 style="margin:0 0 16px;font-size:22px;color:#faf7f0;">Restablecer contraseña</h2>
-          <p style="margin:0 0 24px;color:#bfbab1;line-height:1.6;">Hola <strong style="color:#faf7f0;">${user.name || ''}</strong>, recibimos una solicitud para restablecer tu contraseña. Usa el siguiente botón para crear una nueva.</p>
-          <p style="margin:0 0 32px;">
-            <a href="${url}" style="display:inline-block;padding:14px 28px;background:#d7ff3a;color:#000;text-decoration:none;font-weight:600;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;border-radius:4px;">RESTABLECER CONTRASEÑA</a>
-          </p>
-          <p style="margin:0;color:#6b6760;font-size:12px;">Si no solicitaste este cambio, ignora este correo. Este enlace expira en 1 hora.</p>
-        </td></tr>
-      </table>
-      <p style="margin:24px 0 0;color:#4a4741;font-size:11px;">© ${new Date().getFullYear()} HypePass</p>
-    </td></tr>
-  </table>
-</body>
-</html>`;
+                                const body = `
+<h2 style="margin:0 0 16px;font-size:22px;color:#faf7f0;">Restablecer contraseña</h2>
+<p style="margin:0 0 24px;color:#bfbab1;line-height:1.6;">Hola <strong style="color:#faf7f0;">${user.name || ''}</strong>, recibimos una solicitud para restablecer tu contraseña. Usa el siguiente botón para crear una nueva.</p>
+<p style="margin:0 0 32px;">
+  <a href="${url}" style="display:inline-block;padding:14px 28px;background:#d7ff3a;color:#000;text-decoration:none;font-weight:600;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;border-radius:4px;">RESTABLECER CONTRASEÑA</a>
+</p>
+<p style="margin:0;color:#6b6760;font-size:12px;">Si no solicitaste este cambio, ignora este correo. Este enlace expira en 1 hora.</p>
+`.trim();
+                                const html = wrapInHypePassTemplate(body);
 
                                 const result = await resend.emails.send({
                                     from: fromEmail,
