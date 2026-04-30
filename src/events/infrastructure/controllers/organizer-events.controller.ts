@@ -277,8 +277,9 @@ export class OrganizerEventsController {
     getPromoters(
         @Param('companyId') companyId: string,
         @Param('eventId') eventId: string,
+        @Query('sessionId') sessionId?: string,
     ) {
-        return this.listPromoters.execute(companyId, eventId);
+        return this.listPromoters.execute(companyId, eventId, sessionId);
     }
 
     @Post(':eventId/promoters')

@@ -111,6 +111,49 @@ export class IssueCourtesiesUseCase {
 
         const qty = dto.recipients.length;
 
+        // Guard: prevent issuing a courtesy to a user who already holds an
+        // active ticket for this same session (regardless of how they got
+        // it — paid, courtesy, or transferred). Catches the common
+        // organizer error of double-issuing to the same recipient.
+        //
+        // Considered "active" = current owner + a status that consumes
+        // attendance (ISSUED, LISTED, RESERVED_FOR_RESALE) plus
+        // CHECKED_IN (already entered → can't enter again).
+        const userIdToEmail = new Map<string, string>();
+        for (const r of resolved) userIdToEmail.set(r.userId, r.email);
+        const userIds = [...userIdToEmail.keys()];
+        const existingTickets = await this.dataSource.manager.find(
+            TicketOrmEntity,
+            {
+                where: {
+                    currentOwnerUserId: In(userIds),
+                    eventSessionId: session.id,
+                    status: In([
+                        TicketStatus.ISSUED,
+                        TicketStatus.LISTED,
+                        TicketStatus.RESERVED_FOR_RESALE,
+                        TicketStatus.CHECKED_IN,
+                    ]),
+                },
+                select: { id: true, currentOwnerUserId: true },
+            },
+        );
+        if (existingTickets.length > 0) {
+            const offendingEmails = Array.from(
+                new Set(
+                    existingTickets.map(
+                        (t) =>
+                            userIdToEmail.get(t.currentOwnerUserId) ??
+                            t.currentOwnerUserId,
+                    ),
+                ),
+            );
+            throw new ConflictDomainException(
+                `These email(s) already have a ticket for this session: ${offendingEmails.join(', ')}`,
+                'EMAIL_ALREADY_HAS_TICKET',
+            );
+        }
+
         // Main tx: lock section row, re-check capacity, create 1 order + N items + N tickets.
         const qr = this.dataSource.createQueryRunner();
         await qr.connect();

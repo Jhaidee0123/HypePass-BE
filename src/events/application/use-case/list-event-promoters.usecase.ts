@@ -34,6 +34,7 @@ export class ListEventPromotersUseCase {
     async execute(
         companyId: string,
         eventId: string,
+        sessionId?: string,
     ): Promise<EventPromoterRow[]> {
         const event = await assertEventInCompany(
             this.eventRepo,
@@ -45,45 +46,87 @@ export class ListEventPromotersUseCase {
 
         const codes = promoters.map((p) => p.referralCode);
 
-        const stats = await this.ds.query<
-            Array<{
-                code: string;
-                tickets_sold: string;
-                orders_count: string;
-                gross_revenue: string;
-                currency: string | null;
-            }>
-        >(
-            // CTE pattern avoids the classic JOIN+SUM duplication bug:
-            // joining tickets multiplies o.grand_total by the ticket count.
-            // We collect ticket counts per order in a subquery so each order
-            // contributes its grand_total exactly once to the sum.
-            `WITH order_stats AS (
-                SELECT
-                    o.id,
-                    o.promoter_referral_code AS code,
-                    o.grand_total,
-                    o.currency,
-                    (
-                        SELECT COUNT(t.id)
-                        FROM order_items oi
-                        LEFT JOIN tickets t ON t.order_item_id = oi.id
-                        WHERE oi.order_id = o.id
-                    ) AS ticket_count
-                FROM orders o
-                WHERE o.promoter_referral_code = ANY($1)
-                  AND o.status = 'paid'
-            )
-            SELECT
-                code,
-                COUNT(*)::text AS orders_count,
-                COALESCE(SUM(grand_total), 0)::text AS gross_revenue,
-                COALESCE(SUM(ticket_count), 0)::text AS tickets_sold,
-                MAX(currency) AS currency
-            FROM order_stats
-            GROUP BY code`,
-            [codes],
-        );
+        // Two paths depending on whether the caller wants a per-session
+        // breakdown:
+        //   - `sessionId` UNSET → aggregate at the order level (one row per
+        //     order contributes `grand_total` once). Same as before.
+        //   - `sessionId` SET → aggregate at the ticket level filtered by
+        //     `event_session_id`. We sum `t.face_value` for the matching
+        //     tickets — the order's `grand_total` would be wrong because
+        //     it includes other sessions purchased in the same checkout.
+        const stats = sessionId
+            ? await this.ds.query<
+                  Array<{
+                      code: string;
+                      tickets_sold: string;
+                      orders_count: string;
+                      gross_revenue: string;
+                      currency: string | null;
+                  }>
+              >(
+                  `WITH ticket_stats AS (
+                      SELECT
+                          o.id AS order_id,
+                          o.promoter_referral_code AS code,
+                          t.id AS ticket_id,
+                          t.face_value,
+                          t.currency
+                      FROM orders o
+                      JOIN order_items oi ON oi.order_id = o.id
+                      JOIN tickets t ON t.order_item_id = oi.id
+                      WHERE o.promoter_referral_code = ANY($1)
+                        AND o.status = 'paid'
+                        AND t.event_session_id = $2
+                  )
+                  SELECT
+                      code,
+                      COUNT(DISTINCT order_id)::text AS orders_count,
+                      COUNT(ticket_id)::text AS tickets_sold,
+                      COALESCE(SUM(face_value), 0)::text AS gross_revenue,
+                      MAX(currency) AS currency
+                  FROM ticket_stats
+                  GROUP BY code`,
+                  [codes, sessionId],
+              )
+            : await this.ds.query<
+                  Array<{
+                      code: string;
+                      tickets_sold: string;
+                      orders_count: string;
+                      gross_revenue: string;
+                      currency: string | null;
+                  }>
+              >(
+                  // CTE pattern avoids the classic JOIN+SUM duplication bug:
+                  // joining tickets multiplies o.grand_total by the ticket
+                  // count. We collect ticket counts per order in a subquery
+                  // so each order contributes its grand_total exactly once.
+                  `WITH order_stats AS (
+                      SELECT
+                          o.id,
+                          o.promoter_referral_code AS code,
+                          o.grand_total,
+                          o.currency,
+                          (
+                              SELECT COUNT(t.id)
+                              FROM order_items oi
+                              LEFT JOIN tickets t ON t.order_item_id = oi.id
+                              WHERE oi.order_id = o.id
+                          ) AS ticket_count
+                      FROM orders o
+                      WHERE o.promoter_referral_code = ANY($1)
+                        AND o.status = 'paid'
+                  )
+                  SELECT
+                      code,
+                      COUNT(*)::text AS orders_count,
+                      COALESCE(SUM(grand_total), 0)::text AS gross_revenue,
+                      COALESCE(SUM(ticket_count), 0)::text AS tickets_sold,
+                      MAX(currency) AS currency
+                  FROM order_stats
+                  GROUP BY code`,
+                  [codes],
+              );
 
         const byCode = new Map<
             string,
