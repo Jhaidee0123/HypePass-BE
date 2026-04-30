@@ -1,6 +1,7 @@
 import { Column, Entity, Index } from 'typeorm';
 import { BaseOrmEntity } from '../../../shared/infrastructure/orm/base.orm-entity';
 import { CompanyStatus } from '../../domain/types/company-status';
+import { PaymentGatewayName } from '../../../payments/domain/types/payment-gateway-name';
 
 @Entity({ name: 'companies' })
 export class CompanyOrmEntity extends BaseOrmEntity {
@@ -39,4 +40,14 @@ export class CompanyOrmEntity extends BaseOrmEntity {
 
     @Column('text', { name: 'review_notes', nullable: true })
     reviewNotes: string | null;
+
+    /** Which payment gateway this company prefers for primary checkout.
+     *  Default 'wompi' to preserve pre-MP behavior. */
+    @Column({
+        type: 'varchar',
+        length: 30,
+        name: 'preferred_gateway',
+        default: 'wompi',
+    })
+    preferredGateway: PaymentGatewayName;
 }

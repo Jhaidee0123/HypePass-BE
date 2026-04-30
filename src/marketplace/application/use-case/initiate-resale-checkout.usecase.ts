@@ -170,11 +170,12 @@ export class InitiateResaleCheckoutUseCase {
             await qr.release();
         }
 
-        const signature = this.gateway.generateSignature(
+        const signature = await this.gateway.generateSignature(
             reference,
             amountInCents,
             currency,
         );
+        const publicKey = await this.gateway.getPublicKey();
 
         return {
             orderId: createdOrderId,
@@ -183,7 +184,7 @@ export class InitiateResaleCheckoutUseCase {
             amountInCents,
             currency,
             signature,
-            publicKey: this.gateway.getPublicKey(),
+            publicKey,
             customerEmail: dto.buyerEmail || buyerEmail,
             customerFullName: dto.buyerFullName,
             customerPhone: dto.buyerPhone ?? '',

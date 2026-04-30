@@ -56,14 +56,18 @@ export class CompaniesController {
 
     @Get(':companyId/members')
     @UseGuards(TenantGuard)
-    @CompanyRoles([COMPANY_ROLES.OWNER, COMPANY_ROLES.ADMIN])
+    @CompanyRoles([
+        COMPANY_ROLES.OWNER,
+        COMPANY_ROLES.ADMIN,
+        COMPANY_ROLES.VIEWER,
+    ])
     members(@Param('companyId') companyId: string) {
         return this.listMembers.execute(companyId);
     }
 
     @Post(':companyId/members')
     @UseGuards(TenantGuard)
-    @CompanyRoles([COMPANY_ROLES.OWNER, COMPANY_ROLES.ADMIN])
+    @CompanyRoles([COMPANY_ROLES.OWNER])
     add(
         @Param('companyId') companyId: string,
         @Body() dto: AddMemberDto,

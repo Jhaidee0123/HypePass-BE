@@ -40,6 +40,15 @@ export class OrderOrmEntity extends BaseOrmEntity {
     @Column({ type: 'varchar', length: 40, name: 'payment_provider', default: 'wompi' })
     paymentProvider: string;
 
+    /** Marketplace commission charged on this order (cents). Set when
+     *  the order is processed via a split-capable gateway (MercadoPago).
+     *  Null for non-split gateways (Wompi). */
+    @Column('integer', {
+        name: 'application_fee_amount',
+        nullable: true,
+    })
+    applicationFeeAmount: number | null;
+
     @Index({ unique: true })
     @Column('varchar', { name: 'payment_reference', length: 80 })
     paymentReference: string;

@@ -12,6 +12,8 @@ export class PayoutMethodEntity extends BaseEntity {
     readonly holderLegalId: string;
     readonly isDefault: boolean;
     readonly verifiedAt?: Date | null;
+    readonly wompiBankId?: string | null;
+    readonly accountType?: 'AHORROS' | 'CORRIENTE' | null;
 
     constructor(props: PayoutMethodProps) {
         super(props);
@@ -24,5 +26,7 @@ export class PayoutMethodEntity extends BaseEntity {
         this.holderLegalId = props.holderLegalId;
         this.isDefault = props.isDefault;
         this.verifiedAt = props.verifiedAt ?? null;
+        this.wompiBankId = props.wompiBankId ?? null;
+        this.accountType = props.accountType ?? null;
     }
 }

@@ -291,11 +291,12 @@ export class InitiateCheckoutUseCase {
         }
 
         // Compute signature once all data is persisted
-        const signature = this.gateway.generateSignature(
+        const signature = await this.gateway.generateSignature(
             reference,
             pricing.grandTotal,
             pricing.currency,
         );
+        const publicKey = await this.gateway.getPublicKey();
 
         return {
             orderId: createdOrderId,
@@ -304,7 +305,7 @@ export class InitiateCheckoutUseCase {
             amountInCents: pricing.grandTotal,
             currency: pricing.currency,
             signature,
-            publicKey: this.gateway.getPublicKey(),
+            publicKey,
             customerEmail: input.buyerEmail,
             customerFullName: input.buyerFullName,
             customerPhone: input.buyerPhone,

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CompaniesModule } from '../companies/companies.module';
 import { VenueOrmEntity } from './infrastructure/orm/venue.orm.entity';
@@ -19,7 +19,10 @@ import { UpdateVenueUseCase } from './application/use-case/update-venue.usecase'
 import { DeleteVenueUseCase } from './application/use-case/delete-venue.usecase';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([VenueOrmEntity]), CompaniesModule],
+    imports: [
+        TypeOrmModule.forFeature([VenueOrmEntity]),
+        forwardRef(() => CompaniesModule),
+    ],
     providers: [
         { provide: venue_service_token, useClass: VenueService },
         {

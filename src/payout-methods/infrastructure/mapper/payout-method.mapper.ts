@@ -14,6 +14,8 @@ export class PayoutMethodMapper {
             holderLegalId: orm.holderLegalId,
             isDefault: orm.isDefault,
             verifiedAt: orm.verifiedAt,
+            wompiBankId: orm.wompiBankId,
+            accountType: orm.accountType,
             createdAt: orm.createdAt,
             updatedAt: orm.updatedAt,
         });
@@ -33,6 +35,8 @@ export class PayoutMethodMapper {
             holderLegalId: entity.holderLegalId,
             isDefault: entity.isDefault,
             verifiedAt: entity.verifiedAt ?? null,
+            wompiBankId: entity.wompiBankId ?? null,
+            accountType: entity.accountType ?? null,
         };
     }
 }

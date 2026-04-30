@@ -29,3 +29,6 @@ export const suspend_company_usecase_token = Symbol(
 export const reinstate_company_usecase_token = Symbol(
     'REINSTATE_COMPANY_USECASE_TOKEN',
 );
+export const delete_company_usecase_token = Symbol(
+    'DELETE_COMPANY_USECASE_TOKEN',
+);

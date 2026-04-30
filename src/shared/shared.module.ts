@@ -2,6 +2,7 @@ import { Global, Module } from '@nestjs/common';
 import { CloudinaryService } from './infrastructure/services/cloudinary.service';
 import { EmailService } from './infrastructure/services/email.service';
 import { QrTokenService } from './infrastructure/services/qr-token.service';
+import { CryptoService } from './infrastructure/services/crypto.service';
 import { UploadController } from './infrastructure/controllers/upload.controller';
 
 /**
@@ -10,8 +11,18 @@ import { UploadController } from './infrastructure/controllers/upload.controller
  */
 @Global()
 @Module({
-    providers: [CloudinaryService, EmailService, QrTokenService],
+    providers: [
+        CloudinaryService,
+        EmailService,
+        QrTokenService,
+        CryptoService,
+    ],
     controllers: [UploadController],
-    exports: [CloudinaryService, EmailService, QrTokenService],
+    exports: [
+        CloudinaryService,
+        EmailService,
+        QrTokenService,
+        CryptoService,
+    ],
 })
 export class SharedModule {}

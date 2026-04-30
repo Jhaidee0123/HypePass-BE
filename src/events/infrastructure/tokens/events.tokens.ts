@@ -110,6 +110,9 @@ export const rotate_event_qr_usecase_token = Symbol(
 export const admin_list_events_usecase_token = Symbol(
     'ADMIN_LIST_EVENTS_USECASE_TOKEN',
 );
+export const admin_delete_event_usecase_token = Symbol(
+    'ADMIN_DELETE_EVENT_USECASE_TOKEN',
+);
 
 // ===== promoter use cases =====
 export const event_promoter_service_token = Symbol(

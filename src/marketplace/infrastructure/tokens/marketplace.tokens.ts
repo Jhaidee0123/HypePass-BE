@@ -37,3 +37,9 @@ export const list_payouts_use_case_token = Symbol(
 export const mark_payout_use_case_token = Symbol(
     'MARK_PAYOUT_USE_CASE_TOKEN',
 );
+export const disperse_payout_usecase_token = Symbol(
+    'DISPERSE_PAYOUT_USECASE_TOKEN',
+);
+export const list_my_payouts_usecase_token = Symbol(
+    'LIST_MY_PAYOUTS_USECASE_TOKEN',
+);

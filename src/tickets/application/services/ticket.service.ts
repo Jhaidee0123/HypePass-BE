@@ -50,6 +50,10 @@ export class TicketService implements ITicketRepository {
         });
     }
 
+    countByEvent(eventId: string): Promise<number> {
+        return this.repo.count({ where: { eventId } });
+    }
+
     async groupBySectionAndStatus(
         ticketSectionIds: string[],
     ): Promise<TicketSectionStatusBreakdown[]> {

@@ -23,4 +23,7 @@ export type OrderProps = BaseProps & {
     needsReconciliation?: boolean;
     reconciliationReason?: string | null;
     promoterReferralCode?: string | null;
+    /** Marketplace commission HypePass took on this order (cents). Only
+     *  populated for split-capable gateways like MercadoPago. */
+    applicationFeeAmount?: number | null;
 };

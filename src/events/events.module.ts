@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { CompaniesModule } from '../companies/companies.module';
@@ -66,6 +66,7 @@ import {
     get_event_usecase_token,
     list_events_by_company_usecase_token,
     admin_list_events_usecase_token,
+    admin_delete_event_usecase_token,
     list_pending_events_usecase_token,
     publish_event_usecase_token,
     reject_event_usecase_token,
@@ -121,6 +122,7 @@ import { RejectEventUseCase } from './application/use-case/admin/reject-event.us
 import { PublishEventUseCase } from './application/use-case/admin/publish-event.usecase';
 import { UnpublishEventUseCase } from './application/use-case/admin/unpublish-event.usecase';
 import { RotateEventQrUseCase } from './application/use-case/admin/rotate-event-qr.usecase';
+import { AdminDeleteEventUseCase } from './application/use-case/admin/admin-delete-event.usecase';
 import { ListPublicEventsUseCase } from './application/use-case/public/list-public-events.usecase';
 import { GetPublicEventUseCase } from './application/use-case/public/get-public-event.usecase';
 import { EventPromoterOrmEntity } from './infrastructure/orm/event-promoter.orm.entity';
@@ -147,7 +149,7 @@ import { StaffController } from './infrastructure/controllers/staff.controller';
             EventStaffOrmEntity,
             EventPromoterOrmEntity,
         ]),
-        CompaniesModule,
+        forwardRef(() => CompaniesModule),
         UsersModule,
         VenuesModule,
         CategoriesModule,
@@ -211,8 +213,12 @@ import { StaffController } from './infrastructure/controllers/staff.controller';
         },
         {
             provide: delete_event_usecase_token,
-            useFactory: (s: EventService) => new DeleteEventUseCase(s),
-            inject: [event_service_token],
+            useFactory: (
+                s: EventService,
+                tickets: TicketService,
+                audit: AuditLogService,
+            ) => new DeleteEventUseCase(s, tickets, audit),
+            inject: [event_service_token, ticket_service_token, AuditLogService],
         },
         {
             provide: get_event_sales_summary_usecase_token,
@@ -688,6 +694,15 @@ import { StaffController } from './infrastructure/controllers/staff.controller';
                 audit: AuditLogService,
             ) => new RotateEventQrUseCase(ds, ev, audit),
             inject: [DataSource, event_service_token, AuditLogService],
+        },
+        {
+            provide: admin_delete_event_usecase_token,
+            useFactory: (
+                ev: EventService,
+                tickets: TicketService,
+                audit: AuditLogService,
+            ) => new AdminDeleteEventUseCase(ev, tickets, audit),
+            inject: [event_service_token, ticket_service_token, AuditLogService],
         },
 
         // public (discovery) use cases

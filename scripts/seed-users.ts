@@ -72,7 +72,7 @@ const USERS: SeedUser[] = [
         email: 'staff@hypepass.test',
         password: PASSWORD_DEFAULT,
         name: 'Sara Staff',
-        memberships: [{ companySlug: 'stage-live', role: COMPANY_ROLES.STAFF }],
+        memberships: [{ companySlug: 'stage-live', role: COMPANY_ROLES.VIEWER }],
     },
     // scanner@ is a plain STAFF at company level. Per-event check-in rights
     // come from `event_staff_assignments` (populated by seed-staff.ts).
@@ -80,7 +80,7 @@ const USERS: SeedUser[] = [
         email: 'scanner@hypepass.test',
         password: PASSWORD_DEFAULT,
         name: 'Sam Scanner',
-        memberships: [{ companySlug: 'stage-live', role: COMPANY_ROLES.STAFF }],
+        memberships: [{ companySlug: 'stage-live', role: COMPANY_ROLES.VIEWER }],
     },
     // --- Bass Collective (second company for multi-tenancy) ---
     {

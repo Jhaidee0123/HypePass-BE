@@ -104,4 +104,29 @@ export class PayoutRecordOrmEntity extends BaseOrmEntity {
         nullable: true,
     })
     payoutAccountHolderLegalId: string | null;
+
+    @Column({
+        type: 'varchar',
+        length: 30,
+        name: 'provider_name',
+        nullable: true,
+    })
+    providerName: string | null;
+
+    @Index()
+    @Column({
+        type: 'varchar',
+        length: 80,
+        name: 'provider_reference',
+        nullable: true,
+    })
+    providerReference: string | null;
+
+    @Column({
+        type: 'varchar',
+        length: 500,
+        name: 'failure_reason',
+        nullable: true,
+    })
+    failureReason: string | null;
 }

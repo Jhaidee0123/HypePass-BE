@@ -24,6 +24,7 @@ export class OrderEntity extends BaseEntity {
     readonly needsReconciliation: boolean;
     readonly reconciliationReason?: string | null;
     readonly promoterReferralCode?: string | null;
+    readonly applicationFeeAmount?: number | null;
 
     constructor(props: OrderProps) {
         super(props);
@@ -48,5 +49,6 @@ export class OrderEntity extends BaseEntity {
         this.needsReconciliation = props.needsReconciliation ?? false;
         this.reconciliationReason = props.reconciliationReason ?? null;
         this.promoterReferralCode = props.promoterReferralCode ?? null;
+        this.applicationFeeAmount = props.applicationFeeAmount ?? null;
     }
 }

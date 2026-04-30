@@ -23,6 +23,9 @@ export class PayoutRecordMapper {
             payoutAccountHolderName: orm.payoutAccountHolderName,
             payoutAccountHolderLegalIdType: orm.payoutAccountHolderLegalIdType,
             payoutAccountHolderLegalId: orm.payoutAccountHolderLegalId,
+            providerName: orm.providerName,
+            providerReference: orm.providerReference,
+            failureReason: orm.failureReason,
             createdAt: orm.createdAt,
             updatedAt: orm.updatedAt,
         });
@@ -53,6 +56,9 @@ export class PayoutRecordMapper {
                 entity.payoutAccountHolderLegalIdType ?? null,
             payoutAccountHolderLegalId:
                 entity.payoutAccountHolderLegalId ?? null,
+            providerName: entity.providerName ?? null,
+            providerReference: entity.providerReference ?? null,
+            failureReason: entity.failureReason ?? null,
         };
     }
 }

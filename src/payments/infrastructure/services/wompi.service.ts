@@ -4,13 +4,18 @@ import { HttpService } from '@nestjs/axios';
 import { createHash } from 'crypto';
 import { firstValueFrom } from 'rxjs';
 import { PaymentGatewayPort } from '../../domain/ports/payment-gateway.port';
+import { PaymentGatewayName } from '../../domain/types/payment-gateway-name';
 
 /**
  * Wompi REST + webhook adapter. Mirrors the production integration in
  * HotCaps-Nest-APP — we use the same signature/verification scheme.
+ *
+ * Wompi does NOT support marketplace split — `GatewayContext` is ignored.
+ * For split, see MercadoPagoService.
  */
 @Injectable()
 export class WompiService extends PaymentGatewayPort {
+    readonly name: PaymentGatewayName = 'wompi';
     private readonly logger = new Logger(WompiService.name);
     private readonly publicKey: string;
     private readonly privateKey: string;
@@ -32,15 +37,15 @@ export class WompiService extends PaymentGatewayPort {
         this.apiUrl = this.config.get<string>('WOMPI_API_URL')!;
     }
 
-    getPublicKey(): string {
+    async getPublicKey(): Promise<string> {
         return this.publicKey;
     }
 
-    generateSignature(
+    async generateSignature(
         reference: string,
         amountInCents: number,
         currency: string,
-    ): string {
+    ): Promise<string> {
         const raw = `${reference}${amountInCents}${currency}${this.integritySecret}`;
         return createHash('sha256').update(raw).digest('hex');
     }

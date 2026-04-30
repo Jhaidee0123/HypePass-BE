@@ -12,4 +12,11 @@ export type PayoutMethodProps = BaseProps & {
     holderLegalId: string;
     isDefault: boolean;
     verifiedAt?: Date | null;
+    /** UUID of the bank in Wompi's catalog (`GET /banks`). Required for
+     *  automated disbursement via Wompi Payouts API. Null for legacy rows
+     *  created before automated payouts. */
+    wompiBankId?: string | null;
+    /** AHORROS | CORRIENTE — needed by Wompi Payouts. Null if not
+     *  applicable (Nequi/Daviplata) or legacy. */
+    accountType?: 'AHORROS' | 'CORRIENTE' | null;
 };

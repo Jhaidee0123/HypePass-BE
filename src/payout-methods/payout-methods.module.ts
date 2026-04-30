@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { PaymentsModule } from '../payments/payments.module';
 import { PayoutMethodOrmEntity } from './infrastructure/orm/payout-method.orm.entity';
 import { PayoutMethodService } from './application/services/payout-method.service';
 import {
@@ -18,7 +19,10 @@ import { MakeDefaultPayoutMethodUseCase } from './application/use-case/make-defa
 import { ProfilePayoutMethodsController } from './infrastructure/controllers/profile-payout-methods.controller';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([PayoutMethodOrmEntity])],
+    imports: [
+        TypeOrmModule.forFeature([PayoutMethodOrmEntity]),
+        PaymentsModule,
+    ],
     providers: [
         { provide: payout_method_service_token, useClass: PayoutMethodService },
         {

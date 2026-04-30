@@ -1,7 +1,10 @@
 import {
     Body,
     Controller,
+    Delete,
     Get,
+    HttpCode,
+    HttpStatus,
     Inject,
     Param,
     Patch,
@@ -15,6 +18,7 @@ import { SuspendCompanyDto } from '../../application/dto/suspend-company.dto';
 import { CompanyStatus } from '../../domain/types/company-status';
 import {
     approve_company_usecase_token,
+    delete_company_usecase_token,
     list_companies_usecase_token,
     reinstate_company_usecase_token,
     reject_company_usecase_token,
@@ -27,6 +31,7 @@ import {
     ReinstateCompanyUseCase,
     SuspendCompanyUseCase,
 } from '../../application/use-case/suspend-company.usecase';
+import { DeleteCompanyUseCase } from '../../application/use-case/delete-company.usecase';
 
 @ApiTags('Admin — Companies')
 @ApiCookieAuth()
@@ -44,6 +49,8 @@ export class AdminCompaniesController {
         private readonly suspendCompany: SuspendCompanyUseCase,
         @Inject(reinstate_company_usecase_token)
         private readonly reinstateCompany: ReinstateCompanyUseCase,
+        @Inject(delete_company_usecase_token)
+        private readonly deleteCompany: DeleteCompanyUseCase,
     ) {}
 
     @Get()
@@ -88,5 +95,14 @@ export class AdminCompaniesController {
         @Session() session: UserSession,
     ) {
         return this.reinstateCompany.execute(companyId, session.user.id);
+    }
+
+    @Delete(':companyId')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    async delete(
+        @Param('companyId') companyId: string,
+        @Session() session: UserSession,
+    ) {
+        await this.deleteCompany.execute(companyId, session.user.id);
     }
 }

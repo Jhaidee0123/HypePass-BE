@@ -50,6 +50,14 @@ export class UpdatePayoutMethodUseCase {
                 holderLegalId: dto.holderLegalId ?? current.holderLegalId,
                 isDefault: current.isDefault,
                 verifiedAt: current.verifiedAt,
+                wompiBankId:
+                    dto.wompiBankId !== undefined
+                        ? dto.wompiBankId?.trim() || null
+                        : current.wompiBankId,
+                accountType:
+                    dto.accountType !== undefined
+                        ? dto.accountType ?? null
+                        : current.accountType,
                 updatedAt: new Date(),
             } as any),
         );

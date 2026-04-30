@@ -24,6 +24,9 @@ export class PayoutRecordEntity extends BaseEntity {
     readonly payoutAccountHolderName?: string | null;
     readonly payoutAccountHolderLegalIdType?: string | null;
     readonly payoutAccountHolderLegalId?: string | null;
+    readonly providerName?: string | null;
+    readonly providerReference?: string | null;
+    readonly failureReason?: string | null;
 
     constructor(props: PayoutRecordProps) {
         super(props);
@@ -47,5 +50,8 @@ export class PayoutRecordEntity extends BaseEntity {
             props.payoutAccountHolderLegalIdType ?? null;
         this.payoutAccountHolderLegalId =
             props.payoutAccountHolderLegalId ?? null;
+        this.providerName = props.providerName ?? null;
+        this.providerReference = props.providerReference ?? null;
+        this.failureReason = props.failureReason ?? null;
     }
 }

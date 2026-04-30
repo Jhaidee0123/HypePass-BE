@@ -26,6 +26,7 @@ export class OrderMapper {
             needsReconciliation: orm.needsReconciliation ?? false,
             reconciliationReason: orm.reconciliationReason,
             promoterReferralCode: orm.promoterReferralCode ?? null,
+            applicationFeeAmount: orm.applicationFeeAmount ?? null,
             createdAt: orm.createdAt,
             updatedAt: orm.updatedAt,
         });
@@ -55,6 +56,7 @@ export class OrderMapper {
             needsReconciliation: entity.needsReconciliation ?? false,
             reconciliationReason: entity.reconciliationReason ?? null,
             promoterReferralCode: entity.promoterReferralCode ?? null,
+            applicationFeeAmount: entity.applicationFeeAmount ?? null,
         };
     }
 }

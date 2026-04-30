@@ -15,6 +15,7 @@ export class CompanyMapper {
             reviewedByUserId: orm.reviewedByUserId,
             reviewedAt: orm.reviewedAt,
             reviewNotes: orm.reviewNotes,
+            preferredGateway: orm.preferredGateway ?? 'wompi',
             createdAt: orm.createdAt,
             updatedAt: orm.updatedAt,
         });
@@ -33,6 +34,7 @@ export class CompanyMapper {
             reviewedByUserId: entity.reviewedByUserId ?? null,
             reviewedAt: entity.reviewedAt ?? null,
             reviewNotes: entity.reviewNotes ?? null,
+            preferredGateway: entity.preferredGateway ?? 'wompi',
         };
     }
 }

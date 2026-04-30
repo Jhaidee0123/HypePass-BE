@@ -1,7 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ILike, Repository } from 'typeorm';
+import { DataSource, ILike, In, Repository } from 'typeorm';
 import { EventOrmEntity } from '../../infrastructure/orm/event.orm.entity';
+import { EventSessionOrmEntity } from '../../infrastructure/orm/event-session.orm.entity';
+import { TicketSectionOrmEntity } from '../../infrastructure/orm/ticket-section.orm.entity';
+import { TicketSalePhaseOrmEntity } from '../../infrastructure/orm/ticket-sale-phase.orm.entity';
+import { EventMediaOrmEntity } from '../../infrastructure/orm/event-media.orm.entity';
+import { EventPublicationReviewOrmEntity } from '../../infrastructure/orm/event-publication-review.orm.entity';
+import { EventStaffOrmEntity } from '../../infrastructure/orm/event-staff.orm.entity';
+import { EventPromoterOrmEntity } from '../../infrastructure/orm/event-promoter.orm.entity';
 import { EventMapper } from '../../infrastructure/mapper/event.mapper';
 import { EventEntity } from '../../domain/entities/event.entity';
 import { IEventRepository } from '../../domain/repositories/event.repository';
@@ -12,6 +19,7 @@ export class EventService implements IEventRepository {
     constructor(
         @InjectRepository(EventOrmEntity)
         private readonly repo: Repository<EventOrmEntity>,
+        private readonly ds: DataSource,
     ) {}
 
     async findAll(query?: EventQueryFilter): Promise<EventEntity[]> {
@@ -51,7 +59,46 @@ export class EventService implements IEventRepository {
         return EventMapper.toDomain(updated);
     }
 
+    /**
+     * Cascade delete an event and all its child rows in a single
+     * transaction. Required because the schema uses logical FK columns
+     * (uuid only, no @ManyToOne relations) so TypeORM doesn't cascade by
+     * itself. Caller must guard against deleting events with issued
+     * tickets — this method assumes the financial-trail check already
+     * passed.
+     */
     async delete(id: string): Promise<void> {
-        await this.repo.delete(id);
+        await this.ds.transaction(async (m) => {
+            const sessions = await m.find(EventSessionOrmEntity, {
+                where: { eventId: id },
+                select: { id: true },
+            });
+            const sessionIds = sessions.map((s) => s.id);
+
+            if (sessionIds.length > 0) {
+                const sections = await m.find(TicketSectionOrmEntity, {
+                    where: { eventSessionId: In(sessionIds) },
+                    select: { id: true },
+                });
+                const sectionIds = sections.map((s) => s.id);
+                if (sectionIds.length > 0) {
+                    await m.delete(TicketSalePhaseOrmEntity, {
+                        ticketSectionId: In(sectionIds),
+                    });
+                    await m.delete(TicketSectionOrmEntity, {
+                        id: In(sectionIds),
+                    });
+                }
+                await m.delete(EventSessionOrmEntity, {
+                    id: In(sessionIds),
+                });
+            }
+
+            await m.delete(EventMediaOrmEntity, { eventId: id });
+            await m.delete(EventPublicationReviewOrmEntity, { eventId: id });
+            await m.delete(EventStaffOrmEntity, { eventId: id });
+            await m.delete(EventPromoterOrmEntity, { eventId: id });
+            await m.delete(EventOrmEntity, id);
+        });
     }
 }

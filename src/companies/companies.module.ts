@@ -1,9 +1,15 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from '../users/users.module';
 import { EmailService } from '../shared/infrastructure/services/email.service';
 import { AuditLogService } from '../audit/application/services/audit-log.service';
 import { user_service_token } from '../users/infrastructure/tokens/users.tokens';
+import { EventsModule } from '../events/events.module';
+import { TicketsModule } from '../tickets/tickets.module';
+import { event_service_token } from '../events/infrastructure/tokens/events.tokens';
+import { ticket_service_token } from '../tickets/infrastructure/tokens/tickets.tokens';
+import { EventService } from '../events/application/services/event.service';
+import { TicketService } from '../tickets/application/services/ticket.service';
 import { CompanyOrmEntity } from './infrastructure/orm/company.orm.entity';
 import { CompanyMembershipOrmEntity } from './infrastructure/orm/company-membership.orm.entity';
 import { CompanyService } from './application/services/company.service';
@@ -17,6 +23,7 @@ import {
     company_membership_service_token,
     company_service_token,
     create_company_usecase_token,
+    delete_company_usecase_token,
     list_companies_usecase_token,
     list_members_usecase_token,
     list_my_companies_usecase_token,
@@ -37,6 +44,7 @@ import {
     ReinstateCompanyUseCase,
     SuspendCompanyUseCase,
 } from './application/use-case/suspend-company.usecase';
+import { DeleteCompanyUseCase } from './application/use-case/delete-company.usecase';
 import { AdminNotificationService } from '../admin-notifications/application/services/admin-notification.service';
 
 @Module({
@@ -46,6 +54,8 @@ import { AdminNotificationService } from '../admin-notifications/application/ser
             CompanyMembershipOrmEntity,
         ]),
         UsersModule,
+        forwardRef(() => EventsModule),
+        TicketsModule,
     ],
     providers: [
         { provide: company_service_token, useClass: CompanyService },
@@ -153,9 +163,11 @@ import { AdminNotificationService } from '../admin-notifications/application/ser
         },
         {
             provide: list_members_usecase_token,
-            useFactory: (s: CompanyMembershipService) =>
-                new ListMembersUseCase(s),
-            inject: [company_membership_service_token],
+            useFactory: (
+                memberships: CompanyMembershipService,
+                users: any,
+            ) => new ListMembersUseCase(memberships, users),
+            inject: [company_membership_service_token, user_service_token],
         },
         {
             provide: remove_member_usecase_token,
@@ -174,6 +186,21 @@ import { AdminNotificationService } from '../admin-notifications/application/ser
             useFactory: (svc: CompanyService, audit: AuditLogService) =>
                 new ReinstateCompanyUseCase(svc, audit),
             inject: [company_service_token, AuditLogService],
+        },
+        {
+            provide: delete_company_usecase_token,
+            useFactory: (
+                svc: CompanyService,
+                events: EventService,
+                tickets: TicketService,
+                audit: AuditLogService,
+            ) => new DeleteCompanyUseCase(svc, events, tickets, audit),
+            inject: [
+                company_service_token,
+                event_service_token,
+                ticket_service_token,
+                AuditLogService,
+            ],
         },
         TenantGuard,
     ],

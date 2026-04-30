@@ -1,4 +1,5 @@
 import { BaseEntity } from '../../../shared/domain/entities/base.entity';
+import { PaymentGatewayName } from '../../../payments/domain/types/payment-gateway-name';
 import { CompanyProps } from '../types/company.props';
 import { CompanyStatus } from '../types/company-status';
 
@@ -13,6 +14,7 @@ export class CompanyEntity extends BaseEntity {
     readonly reviewedByUserId?: string | null;
     readonly reviewedAt?: Date | null;
     readonly reviewNotes?: string | null;
+    readonly preferredGateway: PaymentGatewayName;
 
     constructor(props: CompanyProps) {
         super(props);
@@ -26,5 +28,6 @@ export class CompanyEntity extends BaseEntity {
         this.reviewedByUserId = props.reviewedByUserId;
         this.reviewedAt = props.reviewedAt;
         this.reviewNotes = props.reviewNotes;
+        this.preferredGateway = props.preferredGateway ?? 'wompi';
     }
 }

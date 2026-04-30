@@ -1,7 +1,10 @@
 import {
     Body,
     Controller,
+    Delete,
     Get,
+    HttpCode,
+    HttpStatus,
     Inject,
     Param,
     Patch,
@@ -16,6 +19,7 @@ import {
     RejectEventDto,
 } from '../../application/dto/admin-review-event.dto';
 import {
+    admin_delete_event_usecase_token,
     admin_list_events_usecase_token,
     approve_event_usecase_token,
     get_event_for_review_usecase_token,
@@ -33,6 +37,7 @@ import { RejectEventUseCase } from '../../application/use-case/admin/reject-even
 import { PublishEventUseCase } from '../../application/use-case/admin/publish-event.usecase';
 import { UnpublishEventUseCase } from '../../application/use-case/admin/unpublish-event.usecase';
 import { RotateEventQrUseCase } from '../../application/use-case/admin/rotate-event-qr.usecase';
+import { AdminDeleteEventUseCase } from '../../application/use-case/admin/admin-delete-event.usecase';
 
 @ApiTags('Admin — Events')
 @ApiCookieAuth()
@@ -56,6 +61,8 @@ export class AdminEventsController {
         private readonly rotateEventQr: RotateEventQrUseCase,
         @Inject(admin_list_events_usecase_token)
         private readonly listAll: AdminListEventsUseCase,
+        @Inject(admin_delete_event_usecase_token)
+        private readonly deleteEvent: AdminDeleteEventUseCase,
     ) {}
 
     @Get()
@@ -117,5 +124,14 @@ export class AdminEventsController {
         @Param('eventId') eventId: string,
     ) {
         return this.rotateEventQr.execute(eventId, session.user.id);
+    }
+
+    @Delete(':eventId')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    async delete(
+        @Session() session: UserSession,
+        @Param('eventId') eventId: string,
+    ) {
+        await this.deleteEvent.execute(eventId, session.user.id);
     }
 }

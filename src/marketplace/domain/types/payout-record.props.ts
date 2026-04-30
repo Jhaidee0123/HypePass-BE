@@ -26,4 +26,10 @@ export type PayoutRecordProps = BaseProps & {
     payoutAccountHolderName?: string | null;
     payoutAccountHolderLegalIdType?: string | null;
     payoutAccountHolderLegalId?: string | null;
+    /** Provider that processed the disbursement, e.g. 'wompi' | 'mercadopago'. */
+    providerName?: string | null;
+    /** Provider's transaction id for the disbursement (Wompi payout id, etc). */
+    providerReference?: string | null;
+    /** Human-readable reason when status is FAILED. Helps ops triage. */
+    failureReason?: string | null;
 };

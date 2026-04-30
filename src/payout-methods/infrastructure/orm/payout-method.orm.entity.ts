@@ -37,4 +37,20 @@ export class PayoutMethodOrmEntity extends BaseOrmEntity {
 
     @Column('timestamptz', { name: 'verified_at', nullable: true })
     verifiedAt: Date | null;
+
+    @Column({
+        type: 'varchar',
+        length: 80,
+        name: 'wompi_bank_id',
+        nullable: true,
+    })
+    wompiBankId: string | null;
+
+    @Column({
+        type: 'varchar',
+        length: 10,
+        name: 'account_type',
+        nullable: true,
+    })
+    accountType: 'AHORROS' | 'CORRIENTE' | null;
 }

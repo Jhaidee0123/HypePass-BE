@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
     IsBoolean,
     IsEnum,
+    IsIn,
     IsOptional,
     IsString,
     MaxLength,
@@ -47,4 +48,18 @@ export class CreatePayoutMethodDto {
     @IsOptional()
     @IsBoolean()
     makeDefault?: boolean;
+
+    @ApiPropertyOptional({
+        description:
+            'Wompi bank UUID from /banks. Required for automated payout dispersion.',
+    })
+    @IsOptional()
+    @IsString()
+    @MaxLength(80)
+    wompiBankId?: string;
+
+    @ApiPropertyOptional({ enum: ['AHORROS', 'CORRIENTE'] })
+    @IsOptional()
+    @IsIn(['AHORROS', 'CORRIENTE'])
+    accountType?: 'AHORROS' | 'CORRIENTE';
 }

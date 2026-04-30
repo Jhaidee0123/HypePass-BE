@@ -27,6 +27,7 @@ import { CreatePayoutMethodUseCase } from '../../application/use-case/create-pay
 import { UpdatePayoutMethodUseCase } from '../../application/use-case/update-payout-method.usecase';
 import { DeletePayoutMethodUseCase } from '../../application/use-case/delete-payout-method.usecase';
 import { MakeDefaultPayoutMethodUseCase } from '../../application/use-case/make-default-payout-method.usecase';
+import { WompiPayoutsService } from '../../../payments/infrastructure/services/wompi-payouts.service';
 
 @ApiTags('Profile · Payout methods')
 @ApiCookieAuth()
@@ -43,11 +44,24 @@ export class ProfilePayoutMethodsController {
         private readonly deleteMethod: DeletePayoutMethodUseCase,
         @Inject(make_default_payout_method_usecase_token)
         private readonly makeDefault: MakeDefaultPayoutMethodUseCase,
+        private readonly wompiPayouts: WompiPayoutsService,
     ) {}
 
     @Get()
     list(@Session() session: UserSession) {
         return this.listMine.execute(session.user.id);
+    }
+
+    /**
+     * Bank catalog from Wompi (cached 24h server-side). Used by the FE
+     * payout-method form to populate the bank dropdown so we capture the
+     * exact `wompiBankId` required by the Payouts API.
+     *
+     * Auth-only (any logged user); the data isn't sensitive.
+     */
+    @Get('banks')
+    listBanks() {
+        return this.wompiPayouts.listBanks();
     }
 
     @Post()

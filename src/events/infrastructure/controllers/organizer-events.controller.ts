@@ -150,6 +150,11 @@ export class OrganizerEventsController {
     // ===== events =====
 
     @Get()
+    @CompanyRoles([
+        COMPANY_ROLES.OWNER,
+        COMPANY_ROLES.ADMIN,
+        COMPANY_ROLES.VIEWER,
+    ])
     list(@Param('companyId') companyId: string) {
         return this.listEvents.execute(companyId);
     }
@@ -163,6 +168,11 @@ export class OrganizerEventsController {
     }
 
     @Get(':eventId')
+    @CompanyRoles([
+        COMPANY_ROLES.OWNER,
+        COMPANY_ROLES.ADMIN,
+        COMPANY_ROLES.VIEWER,
+    ])
     get(
         @Param('companyId') companyId: string,
         @Param('eventId') eventId: string,
@@ -180,15 +190,22 @@ export class OrganizerEventsController {
     }
 
     @Delete(':eventId')
+    @CompanyRoles([COMPANY_ROLES.OWNER])
     @HttpCode(HttpStatus.NO_CONTENT)
     async delete(
         @Param('companyId') companyId: string,
         @Param('eventId') eventId: string,
+        @Session() session: UserSession,
     ) {
-        await this.deleteEvent.execute(companyId, eventId);
+        await this.deleteEvent.execute(companyId, eventId, session.user.id);
     }
 
     @Get(':eventId/sales-summary')
+    @CompanyRoles([
+        COMPANY_ROLES.OWNER,
+        COMPANY_ROLES.ADMIN,
+        COMPANY_ROLES.VIEWER,
+    ])
     salesSummary(
         @Param('companyId') companyId: string,
         @Param('eventId') eventId: string,
@@ -299,6 +316,11 @@ export class OrganizerEventsController {
     // ===== attendees (paid + courtesy ticket holders) =====
 
     @Get(':eventId/attendees')
+    @CompanyRoles([
+        COMPANY_ROLES.OWNER,
+        COMPANY_ROLES.ADMIN,
+        COMPANY_ROLES.VIEWER,
+    ])
     getAttendees(
         @Param('companyId') companyId: string,
         @Param('eventId') eventId: string,

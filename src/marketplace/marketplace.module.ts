@@ -34,9 +34,11 @@ import { PayoutRecordService } from './application/services/payout-record.servic
 import {
     cancel_resale_listing_use_case_token,
     create_resale_listing_use_case_token,
+    disperse_payout_usecase_token,
     get_resale_listing_use_case_token,
     initiate_resale_checkout_use_case_token,
     list_active_resale_listings_use_case_token,
+    list_my_payouts_usecase_token,
     list_my_resale_listings_use_case_token,
     list_payouts_use_case_token,
     mark_payout_use_case_token,
@@ -56,9 +58,13 @@ import { InitiateResaleCheckoutUseCase } from './application/use-case/initiate-r
 import { SettleResaleOrderUseCase } from './application/use-case/settle-resale-order.usecase';
 import { ListPayoutsUseCase } from './application/use-case/admin/list-payouts.usecase';
 import { MarkPayoutUseCase } from './application/use-case/admin/mark-payout.usecase';
+import { DispersePayoutUseCase } from './application/use-case/disperse-payout.usecase';
+import { ListMyPayoutsUseCase } from './application/use-case/list-my-payouts.usecase';
+import { WompiPayoutsService } from '../payments/infrastructure/services/wompi-payouts.service';
 import { MarketController } from './infrastructure/controllers/market.controller';
 import { WalletListingsController } from './infrastructure/controllers/wallet-listings.controller';
 import { AdminPayoutsController } from './infrastructure/controllers/admin-payouts.controller';
+import { MyPayoutsController } from './infrastructure/controllers/my-payouts.controller';
 
 @Module({
     imports: [
@@ -238,6 +244,35 @@ import { AdminPayoutsController } from './infrastructure/controllers/admin-payou
             inject: [payout_record_service_token, AuditLogService],
         },
         {
+            provide: disperse_payout_usecase_token,
+            useFactory: (
+                payouts,
+                payoutMethod,
+                user,
+                wompiPayouts: WompiPayoutsService,
+                audit: AuditLogService,
+            ) =>
+                new DispersePayoutUseCase(
+                    payouts,
+                    payoutMethod,
+                    user,
+                    wompiPayouts,
+                    audit,
+                ),
+            inject: [
+                payout_record_service_token,
+                payout_method_service_token,
+                user_service_token,
+                WompiPayoutsService,
+                AuditLogService,
+            ],
+        },
+        {
+            provide: list_my_payouts_usecase_token,
+            useFactory: (payouts) => new ListMyPayoutsUseCase(payouts),
+            inject: [payout_record_service_token],
+        },
+        {
             provide: settle_resale_order_use_case_token,
             useFactory: (
                 ds: DataSource,
@@ -288,12 +323,14 @@ import { AdminPayoutsController } from './infrastructure/controllers/admin-payou
         MarketController,
         WalletListingsController,
         AdminPayoutsController,
+        MyPayoutsController,
     ],
     exports: [
         resale_listing_service_token,
         resale_order_service_token,
         payout_record_service_token,
         settle_resale_order_use_case_token,
+        disperse_payout_usecase_token,
     ],
 })
 export class MarketplaceModule {}

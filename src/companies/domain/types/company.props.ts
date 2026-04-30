@@ -1,4 +1,5 @@
 import { BaseProps } from '../../../shared/domain/types/base.props';
+import { PaymentGatewayName } from '../../../payments/domain/types/payment-gateway-name';
 import { CompanyStatus } from './company-status';
 
 export type CompanyProps = BaseProps & {
@@ -12,4 +13,7 @@ export type CompanyProps = BaseProps & {
     reviewedByUserId?: string | null;
     reviewedAt?: Date | null;
     reviewNotes?: string | null;
+    /** Which payment gateway this company prefers for primary checkout.
+     *  Defaults to 'wompi' for backward compatibility. */
+    preferredGateway?: PaymentGatewayName;
 };

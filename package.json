@@ -32,7 +32,8 @@
     "db:seed-staff": "ts-node -r tsconfig-paths/register scripts/seed-staff.ts",
     "db:seed": "yarn db:seed-users && yarn db:seed-events && yarn db:seed-payout-methods && yarn db:seed-tickets && yarn db:seed-staff",
     "db:reseed": "yarn db:reset && yarn db:seed",
-    "email:upload-logo": "ts-node -r tsconfig-paths/register scripts/upload-email-logo.ts"
+    "email:upload-logo": "ts-node -r tsconfig-paths/register scripts/upload-email-logo.ts",
+    "db:migrate-company-staff": "ts-node -r tsconfig-paths/register scripts/migrate-company-staff-to-viewer.ts"
   },
   "dependencies": {
     "@nestjs/axios": "^4.0.1",

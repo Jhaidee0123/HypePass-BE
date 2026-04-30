@@ -17,6 +17,9 @@ export interface ITicketRepository {
         ticketSectionId: string,
         statuses: TicketStatus[],
     ): Promise<number>;
+    /** Total ticket count for an event (any status). Used by deletion
+     *  guards to prevent destroying events with financial trail. */
+    countByEvent(eventId: string): Promise<number>;
     /**
      * Groups tickets by `(ticket_section_id, status)` returning counts and the
      * sum of `face_value`. Used by the sales-summary endpoint to avoid N+1s

@@ -39,6 +39,8 @@ export class CreatePayoutMethodUseCase {
                 holderLegalIdType: dto.holderLegalIdType.toUpperCase(),
                 holderLegalId: dto.holderLegalId.trim(),
                 isDefault: makeDefault && existing.length === 0,
+                wompiBankId: dto.wompiBankId?.trim() ?? null,
+                accountType: dto.accountType ?? null,
             }),
         );
 
